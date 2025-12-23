@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Search, Waves, User, ChevronRight, Droplets, Trophy, FileText, Phone, Users, UserCheck, Activity, Info, Download, MapPin, Clock as ClockIcon, Facebook, Instagram, Share2, Lock, ArrowRight, ShieldCheck, FileSpreadsheet, X, Calendar, CreditCard, CreditCard as CardIcon, Loader2, Check } from 'lucide-react';
+import { Sparkles, Search, Waves, User, ChevronRight, Droplets, Trophy, FileText, Phone, Users, UserCheck, Activity, Info, Download, MapPin, Clock as ClockIcon, Facebook, Instagram, Share2, Lock, ArrowRight, ShieldCheck, FileSpreadsheet, X, Calendar, CreditCard, CreditCard as CardIcon, Loader2, Check, Heart } from 'lucide-react';
 import { MOCK_SCHEDULE, TEACHERS } from './constants';
 import { SwimClass, DayOfWeek, ExperienceLevel, AIRecommendation, UserProfile, ActivityType, ClassType, TargetAudience } from './types';
 import { getSwimmingRecommendation } from './services/geminiService';
@@ -10,7 +10,7 @@ import * as XLSX from 'xlsx';
 interface BookingRecord {
   // Metadata
   bookingTimestamp: string;
-  paymentStatus: 'Aprobado' | 'Pendiente';
+  paymentStatus: 'Pendiente de Pago' | 'Confirmado';
   
   // User Data
   dni: string;
@@ -81,7 +81,7 @@ const Footer = () => (
 
 const App: React.FC = () => {
   // App State
-  const [step, setStep] = useState<'profile' | 'schedule' | 'payment' | 'success'>('profile');
+  const [step, setStep] = useState<'profile' | 'schedule' | 'success'>('profile');
   const [userProfile, setUserProfile] = useState<UserProfile>({ 
     age: 25, 
     level: ExperienceLevel.BEGINNER, 
@@ -104,10 +104,6 @@ const App: React.FC = () => {
   const [isBooking, setIsBooking] = useState(false);
   const [bookingError, setBookingError] = useState<string | null>(null);
   
-  // Payment State
-  const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
-  const [paymentDone, setPaymentDone] = useState(false);
-
   // Store all bookings in memory
   const [allBookings, setAllBookings] = useState<BookingRecord[]>([]);
 
@@ -209,22 +205,10 @@ const App: React.FC = () => {
 
     setIsBooking(true);
     setTimeout(() => {
-      setIsBooking(false);
-      setIsModalOpen(false);
-      setStep('payment');
-    }, 1200);
-  };
-
-  const handleSimulatePayment = () => {
-    if (!selectedClass) return;
-    setIsPaymentProcessing(true);
-    
-    // Step-based simulation
-    setTimeout(() => {
       // Create final record
       const newRecord: BookingRecord = {
         bookingTimestamp: new Date().toLocaleString(),
-        paymentStatus: 'Aprobado',
+        paymentStatus: 'Pendiente de Pago',
         dni: userProfile.documentNumber,
         name: userProfile.name,
         phone: userProfile.phoneNumber,
@@ -239,14 +223,11 @@ const App: React.FC = () => {
         price: selectedClass.price
       };
 
-      setPaymentDone(true);
-      setTimeout(() => {
-        setAllBookings(prev => [...prev, newRecord]);
-        setIsPaymentProcessing(false);
-        setPaymentDone(false);
-        setStep('success');
-      }, 1500);
-    }, 2500);
+      setAllBookings(prev => [...prev, newRecord]);
+      setIsBooking(false);
+      setIsModalOpen(false);
+      setStep('success');
+    }, 1500);
   };
 
   const handleAdminAuth = (e: React.FormEvent) => {
@@ -305,45 +286,103 @@ const App: React.FC = () => {
   // Render Functions
   const renderProfileStep = () => (
     <div className="w-full animate-in fade-in duration-500">
-      <div className="relative rounded-3xl overflow-hidden mb-12 bg-brand-900 shadow-2xl">
-        <div className="absolute inset-0">
-          <img 
-            src="https://images.unsplash.com/photo-1530549387789-4c1017266635?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80" 
-            alt="Swimming Pool" 
-            className="w-full h-full object-cover opacity-40"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-brand-900/90 to-transparent"></div>
+      <div className="relative rounded-3xl overflow-hidden mb-8 bg-brand-900 shadow-2xl min-h-[450px]">
+        {/* Background Gallery Section */}
+        <div className="absolute inset-0 grid grid-cols-1 md:grid-cols-3">
+          <div className="relative h-full w-full overflow-hidden">
+            <img 
+              src="https://images.unsplash.com/photo-1530549387789-4c1017266635?auto=format&fit=crop&q=80&w=1000" 
+              alt="Nadador de competición" 
+              className="w-full h-full object-cover opacity-60 hover:scale-105 transition-transform duration-1000"
+            />
+          </div>
+          <div className="relative h-full w-full hidden md:block overflow-hidden">
+            <img 
+              src="https://images.unsplash.com/photo-1585952136018-0975e0766282?auto=format&fit=crop&q=80&w=1000" 
+              alt="Niños en la piscina" 
+              className="w-full h-full object-cover opacity-40 hover:scale-105 transition-transform duration-1000 border-x border-white/5"
+            />
+          </div>
+          <div className="relative h-full w-full hidden md:block overflow-hidden">
+            <img 
+              src="https://images.unsplash.com/photo-1545300662-75608d4b3df3?auto=format&fit=crop&q=80&w=1000" 
+              alt="Adulto mayor nadando" 
+              className="w-full h-full object-cover opacity-40 hover:scale-105 transition-transform duration-1000"
+            />
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-r from-brand-950 via-brand-900/40 to-transparent"></div>
         </div>
+
         <div className="relative z-10 p-8 md:p-12 lg:p-16 max-w-2xl">
            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-semibold uppercase tracking-wider mb-6">
              <Sparkles size={12} className="text-yellow-400" />
              Temporada 2026
            </div>
            <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
-             Descubre tu potencial <br/> en el agua
+             Sumérgete en <br/> la excelencia
            </h1>
            <p className="text-brand-100 text-lg mb-8 leading-relaxed max-w-lg">
              Sistema oficial de reservas de Natación Obras Paraguay. 
-             Clases grupales, particulares y aquagym adaptadas a tu nivel.
+             Un espacio inclusivo para formar nadadores de todas las edades con técnica y pasión en el agua.
            </p>
            <div className="flex flex-wrap gap-4">
-             <div className="flex items-center gap-2 text-white/80 bg-black/20 px-4 py-2 rounded-lg backdrop-blur-sm text-sm">
-                <Check className="text-green-400" size={16} /> Profesores Certificados
+             <div className="flex items-center gap-2 text-white/90 bg-black/30 px-4 py-2 rounded-lg backdrop-blur-sm text-sm border border-white/10">
+                <Trophy size={18} className="text-brand-400" /> Formación Técnica
              </div>
-             <div className="flex items-center gap-2 text-white/80 bg-black/20 px-4 py-2 rounded-lg backdrop-blur-sm text-sm">
-                <Check className="text-green-400" size={16} /> Piscina Climatizada
+             <div className="flex items-center gap-2 text-white/90 bg-black/30 px-4 py-2 rounded-lg backdrop-blur-sm text-sm border border-white/10">
+                <Heart size={18} className="text-red-400" /> Salud & Diversión
              </div>
            </div>
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto bg-white p-8 rounded-3xl shadow-xl shadow-slate-200 border border-slate-100 relative -mt-8 z-20">
+      {/* Programs Preview Section */}
+      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 group">
+          <div className="h-44 overflow-hidden relative">
+            <img src="https://images.unsplash.com/photo-1519214605650-76a613ee3245?auto=format&fit=crop&q=80&w=800" alt="Niños nadando" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+            <p className="absolute bottom-3 left-4 text-white font-bold flex items-center gap-2">
+              <Droplets size={16} /> Niños (4-12 años)
+            </p>
+          </div>
+          <div className="p-4">
+            <p className="text-sm text-slate-500 leading-relaxed">Aprendizaje lúdico y seguro para los más pequeños en grupos divididos por nivel.</p>
+          </div>
+        </div>
+        <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 group">
+          <div className="h-44 overflow-hidden relative">
+            <img src="https://images.unsplash.com/photo-1519315901367-f34ff9154487?auto=format&fit=crop&q=80&w=800" alt="Adulto nadando" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+            <p className="absolute bottom-3 left-4 text-white font-bold flex items-center gap-2">
+              <Activity size={16} /> Adultos & Entrenamiento
+            </p>
+          </div>
+          <div className="p-4">
+            <p className="text-sm text-slate-500 leading-relaxed">Perfeccionamiento de estilos y entrenamiento de resistencia para todos los niveles.</p>
+          </div>
+        </div>
+        <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 group">
+          <div className="h-44 overflow-hidden relative">
+            <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=800" alt="Adultos mayores en aquagym" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+            <p className="absolute bottom-3 left-4 text-white font-bold flex items-center gap-2">
+              <Waves size={16} /> Aquagym (Adultos Mayores)
+            </p>
+          </div>
+          <div className="p-4">
+            <p className="text-sm text-slate-500 leading-relaxed">Clases grupales de bajo impacto diseñadas para mejorar la salud y movilidad de los adultos mayores.</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-3xl mx-auto bg-white p-8 rounded-3xl shadow-xl shadow-slate-200 border border-slate-100 z-20">
         <div className="mb-6 pb-6 border-b border-slate-100">
            <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-            <User className="text-brand-600" />
-            Comenzar Inscripción
+            <UserCheck className="text-brand-600" />
+            Reserva tu Clase
           </h2>
-          <p className="text-slate-500 text-sm mt-1">Completa los datos del alumno para encontrar el grupo ideal.</p>
+          <p className="text-slate-500 text-sm mt-1">Ingresa tus datos para ver los horarios disponibles según tu perfil.</p>
         </div>
         
         <form onSubmit={handleProfileSubmit} className="space-y-6">
@@ -400,7 +439,7 @@ const App: React.FC = () => {
             <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl mb-6 flex gap-3">
               <Info className="text-blue-500 flex-shrink-0" />
               <p className="text-sm text-blue-800">
-                <strong>Política:</strong> Alumnos grupales pueden reservar hasta <strong>dos días</strong> por semana.
+                <strong>Nota:</strong> Los alumnos de clases grupales pueden reservar hasta <strong>dos sesiones</strong> semanales.
               </p>
             </div>
 
@@ -479,9 +518,9 @@ const App: React.FC = () => {
             className="w-full bg-brand-600 hover:bg-brand-700 disabled:opacity-70 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-brand-200 flex justify-center items-center gap-2 mt-4"
           >
             {isLoadingAI ? (
-              <><Loader2 className="animate-spin" /> Buscando Disponibilidad...</>
+              <><Loader2 className="animate-spin" /> Analizando Disponibilidad...</>
             ) : (
-              <>Ver Horarios Disponibles <ChevronRight size={20} /></>
+              <>Buscar Horarios <ChevronRight size={20} /></>
             )}
           </button>
         </form>
@@ -635,110 +674,6 @@ const App: React.FC = () => {
     );
   };
 
-  const renderPaymentStep = () => {
-    if (!selectedClass) return null;
-    const teacher = TEACHERS[selectedClass.teacherId];
-
-    return (
-      <div className="max-w-4xl mx-auto w-full animate-in slide-in-from-bottom duration-500">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Summary */}
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-slate-900">Resumen de tu Reserva</h2>
-            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
-              <div className="flex items-center gap-4 border-b border-slate-50 pb-4">
-                <img src={teacher.photoUrl} className="w-16 h-16 rounded-full object-cover" />
-                <div>
-                  <h4 className="font-bold text-slate-900">{teacher.name}</h4>
-                  <p className="text-sm text-slate-500">{selectedClass.day}, {selectedClass.time} hs</p>
-                </div>
-              </div>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Actividad:</span>
-                  <span className="font-medium text-slate-900">{selectedClass.activityType}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Nivel:</span>
-                  <span className="font-medium text-slate-900">{selectedClass.level}</span>
-                </div>
-                <div className="flex justify-between border-t border-slate-50 pt-2 text-lg font-bold text-brand-600">
-                  <span>Total a pagar:</span>
-                  <span>Gs. {selectedClass.price.toLocaleString()}</span>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-amber-50 p-4 rounded-2xl flex gap-3 border border-amber-100">
-              <ShieldCheck className="text-amber-600 shrink-0" size={20} />
-              <p className="text-xs text-amber-800 leading-relaxed">
-                Pago 100% seguro. Tu transacción está protegida por encriptación bancaria SSL de 256 bits.
-              </p>
-            </div>
-          </div>
-
-          {/* Simulated Payment Form */}
-          <div className="bg-white p-8 rounded-3xl shadow-xl border border-slate-100">
-            <div className="flex items-center gap-2 mb-8">
-              <CreditCard className="text-brand-600" size={24} />
-              <h3 className="text-lg font-bold text-slate-900">Método de Pago</h3>
-            </div>
-
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <button className="flex flex-col items-center justify-center p-4 border-2 border-brand-500 bg-brand-50 rounded-2xl text-brand-600 font-medium">
-                  <CardIcon size={24} className="mb-2" />
-                  <span className="text-xs">Tarjeta</span>
-                </button>
-                <button className="flex flex-col items-center justify-center p-4 border border-slate-200 rounded-2xl text-slate-400 hover:bg-slate-50 transition-colors">
-                  <Waves size={24} className="mb-2" />
-                  <span className="text-xs">Transferencia</span>
-                </button>
-              </div>
-
-              <div className="space-y-3">
-                <div className="relative">
-                  <input readOnly value="4532 •••• •••• 1092" className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 text-sm" />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <input readOnly value="12/28" className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 text-sm" />
-                  <input readOnly value="•••" className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 text-sm" />
-                </div>
-              </div>
-
-              <button 
-                onClick={handleSimulatePayment}
-                disabled={isPaymentProcessing}
-                className="w-full bg-brand-600 hover:bg-brand-700 disabled:opacity-80 text-white font-bold py-4 rounded-2xl shadow-lg shadow-brand-100 transition-all flex items-center justify-center gap-3 mt-6"
-              >
-                {isPaymentProcessing ? (
-                  <>
-                    {paymentDone ? (
-                      <div className="flex items-center gap-2 animate-in zoom-in">
-                        <Check size={20} className="text-white bg-green-500 rounded-full p-0.5" />
-                        <span>¡Pago Exitoso!</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <Loader2 className="animate-spin" size={20} />
-                        <span>Procesando pago...</span>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <>Confirmar Pago Gs. {selectedClass.price.toLocaleString()}</>
-                )}
-              </button>
-              <p className="text-[10px] text-center text-slate-400 mt-4 px-4 leading-tight">
-                Al hacer clic en confirmar pago, usted acepta nuestros términos de servicio y políticas de cancelación.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   const renderSuccessStep = () => {
     const bookingCount = getUserBookingCount();
     const canBookMore = bookingCount < 2;
@@ -749,19 +684,19 @@ const App: React.FC = () => {
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600 shadow-inner">
               <Check size={40} strokeWidth={3} />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">¡Reserva Confirmada!</h2>
-          <p className="text-slate-600 mb-6">
-              Tu pago ha sido procesado correctamente para el día <strong>{selectedClass?.day} a las {selectedClass?.time} hs</strong>.
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">¡Reserva Registrada!</h2>
+          <p className="text-slate-600 mb-6 text-sm">
+              Tu reserva para el día <strong>{selectedClass?.day} a las {selectedClass?.time} hs</strong> ha sido registrada con éxito.
           </p>
 
           <div className="bg-slate-50 p-4 rounded-xl mb-4 border border-slate-100 text-left flex items-start gap-3">
             <div className="space-y-2 w-full">
               <div className="flex justify-between text-xs text-slate-500 uppercase font-bold">
-                <span>Estado de Pago</span>
-                <span className="text-green-600">Aprobado</span>
+                <span>Estado de Reserva</span>
+                <span className="text-brand-600">Confirmada</span>
               </div>
               <div className="flex justify-between text-xs text-slate-500 uppercase font-bold">
-                <span>Código Transacción</span>
+                <span>Código</span>
                 <span className="text-slate-900 font-mono">#OBR-{Math.floor(Math.random()*90000)+10000}</span>
               </div>
             </div>
@@ -771,14 +706,14 @@ const App: React.FC = () => {
             <div className="bg-blue-50 p-4 rounded-xl mb-6 border border-blue-100 text-left flex items-start gap-3">
               <Info className="text-blue-600 mt-0.5 flex-shrink-0" size={18} />
               <div className="text-sm text-blue-800">
-                Has completado <strong>{bookingCount} de 2</strong> reservas semanales.
+                Has completado <strong>{bookingCount} de 2</strong> reservas semanales permitidas.
               </div>
             </div>
           ) : (
              <div className="bg-green-50 p-4 rounded-xl mb-6 border border-green-100 text-left flex items-start gap-3">
               <Check className="text-green-600 mt-0.5 flex-shrink-0" size={18} />
               <div className="text-sm text-green-800">
-                ¡Límite alcanzado! Ya tienes tus <strong>2 reservas</strong> semanales.
+                ¡Límite alcanzado! Ya tienes tus <strong>2 reservas</strong> para esta semana.
               </div>
             </div>
           )}
@@ -789,7 +724,7 @@ const App: React.FC = () => {
                     onClick={() => setStep('schedule')}
                     className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl transition-colors shadow-md"
                 >
-                    Reservar segunda clase
+                    Reservar otra clase
                 </button>
               )}
               
@@ -798,7 +733,7 @@ const App: React.FC = () => {
                 className="w-full flex items-center justify-center gap-2 text-brand-600 bg-brand-50 hover:bg-brand-100 font-bold py-3 rounded-xl transition-colors border border-brand-200"
               >
                 <Share2 size={20} />
-                Invitar a un amigo
+                Compartir con un amigo
               </button>
 
               <button 
@@ -847,7 +782,6 @@ const App: React.FC = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 flex flex-col items-center flex-grow w-full">
         {step === 'profile' && renderProfileStep()}
         {step === 'schedule' && renderScheduleStep()}
-        {step === 'payment' && renderPaymentStep()}
         {step === 'success' && renderSuccessStep()}
       </main>
 
@@ -922,8 +856,8 @@ const App: React.FC = () => {
                         <tr>
                           <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">Alumno</th>
                           <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">Clase</th>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">Monto</th>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">Estado Pago</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">Reserva</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">Estado</th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-slate-200">
@@ -938,7 +872,7 @@ const App: React.FC = () => {
                             </td>
                             <td className="px-6 py-4 text-sm font-medium">Gs. {record.price.toLocaleString()}</td>
                             <td className="px-6 py-4">
-                                <span className="px-2 py-1 text-xs font-bold rounded-full bg-green-100 text-green-700">
+                                <span className="px-2 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-700">
                                   {record.paymentStatus}
                                 </span>
                             </td>

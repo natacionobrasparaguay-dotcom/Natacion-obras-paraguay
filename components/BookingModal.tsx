@@ -21,7 +21,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
         <div className="bg-brand-600 p-5 flex justify-between items-center text-white">
-          <h3 className="font-bold text-lg">Confirmar Selección</h3>
+          <h3 className="font-bold text-lg">Confirmar Reserva</h3>
           <button onClick={onClose} className="hover:bg-brand-700 p-1 rounded-full transition-colors">
             <X size={20} />
           </button>
@@ -57,10 +57,10 @@ export const BookingModal: React.FC<BookingModalProps> = ({
             </div>
           </div>
 
-          <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl flex gap-3 items-start">
-             <Info className="text-blue-600 shrink-0 mt-0.5" size={18} />
-             <p className="text-xs text-blue-800 text-left leading-relaxed">
-               Al confirmar, procederás a la pasarela de pago para asegurar tu cupo de Gs. <strong>{selectedClass.price.toLocaleString()}</strong>.
+          <div className="bg-brand-50 border border-brand-100 p-4 rounded-xl flex gap-3 items-start">
+             <Info className="text-brand-600 shrink-0 mt-0.5" size={18} />
+             <p className="text-xs text-brand-800 text-left leading-relaxed">
+               Al confirmar, tu lugar quedará reservado para el ciclo actual. Valor de la clase: Gs. <strong>{selectedClass.price.toLocaleString()}</strong>.
              </p>
           </div>
 
@@ -74,12 +74,12 @@ export const BookingModal: React.FC<BookingModalProps> = ({
           <button
             onClick={onConfirm}
             disabled={isProcessing}
-            className="w-full bg-brand-600 hover:bg-brand-700 disabled:bg-brand-300 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-brand-100 flex justify-center items-center gap-2"
+            className="w-full bg-slate-900 hover:bg-slate-800 disabled:bg-slate-400 text-white font-bold py-4 rounded-2xl transition-all shadow-lg flex justify-center items-center gap-2"
           >
             {isProcessing ? (
               <Loader2 className="animate-spin" />
             ) : (
-              <>Continuar al Pago</>
+              <>Confirmar Reserva</>
             )}
           </button>
         </div>
