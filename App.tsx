@@ -364,14 +364,14 @@ const App: React.FC = () => {
         </div>
         <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 group">
           <div className="h-44 overflow-hidden relative">
-            <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=800" alt="Adultos mayores en aquagym" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+            <img src="https://images.unsplash.com/photo-1545300662-75608d4b3df3?auto=format&fit=crop&q=80&w=800" alt="Adultos mayores en la piscina" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
             <p className="absolute bottom-3 left-4 text-white font-bold flex items-center gap-2">
               <Waves size={16} /> Aquagym (Adultos Mayores)
             </p>
           </div>
           <div className="p-4">
-            <p className="text-sm text-slate-500 leading-relaxed">Clases grupales de bajo impacto diseñadas para mejorar la salud y movilidad de los adultos mayores.</p>
+            <p className="text-sm text-slate-500 leading-relaxed">Clases grupales de bajo impacto diseñadas específicamente para mejorar la salud y movilidad de los adultos mayores.</p>
           </div>
         </div>
       </div>
