@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Search, Waves, User, ChevronRight, Droplets, Trophy, FileText, Phone, Users, UserCheck, Activity, Info, Download, MapPin, Clock as ClockIcon, Facebook, Instagram, Share2, Lock, ArrowRight, ShieldCheck, FileSpreadsheet, X, Calendar } from 'lucide-react';
+import { Sparkles, Search, Waves, User, ChevronRight, Droplets, Trophy, FileText, Phone, Users, UserCheck, Activity, Info, Download, MapPin, Clock as ClockIcon, Facebook, Instagram, Share2, Lock, ArrowRight, ShieldCheck, FileSpreadsheet, X, Calendar, CreditCard, CreditCard as CardIcon, Loader2, Check } from 'lucide-react';
 import { MOCK_SCHEDULE, TEACHERS } from './constants';
 import { SwimClass, DayOfWeek, ExperienceLevel, AIRecommendation, UserProfile, ActivityType, ClassType, TargetAudience } from './types';
 import { getSwimmingRecommendation } from './services/geminiService';
@@ -10,6 +10,7 @@ import * as XLSX from 'xlsx';
 interface BookingRecord {
   // Metadata
   bookingTimestamp: string;
+  paymentStatus: 'Aprobado' | 'Pendiente';
   
   // User Data
   dni: string;
@@ -25,6 +26,7 @@ interface BookingRecord {
   time: string;
   teacherName: string;
   level: string;
+  price: number;
 }
 
 const Footer = () => (
@@ -79,7 +81,7 @@ const Footer = () => (
 
 const App: React.FC = () => {
   // App State
-  const [step, setStep] = useState<'profile' | 'schedule' | 'success'>('profile');
+  const [step, setStep] = useState<'profile' | 'schedule' | 'payment' | 'success'>('profile');
   const [userProfile, setUserProfile] = useState<UserProfile>({ 
     age: 25, 
     level: ExperienceLevel.BEGINNER, 
@@ -102,6 +104,10 @@ const App: React.FC = () => {
   const [isBooking, setIsBooking] = useState(false);
   const [bookingError, setBookingError] = useState<string | null>(null);
   
+  // Payment State
+  const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
+  const [paymentDone, setPaymentDone] = useState(false);
+
   // Store all bookings in memory
   const [allBookings, setAllBookings] = useState<BookingRecord[]>([]);
 
@@ -150,44 +156,34 @@ const App: React.FC = () => {
 
   // Filter classes based on profile and constraints
   useEffect(() => {
-    if (aiRecommendation) {
+    if (aiRecommendation || step === 'schedule') {
       const isKid = userProfile.age >= 4 && userProfile.age <= 12;
 
       const filtered = MOCK_SCHEDULE.filter(c => {
-        // 1. Basic Filter: Day and Available Slots
         const matchDay = selectedDay === 'ALL' || c.day === selectedDay;
         const hasSlots = c.totalSlots > c.bookedSlots;
-
-        // 2. Class Type Filter (Private vs Group)
         const matchType = c.classType === userProfile.classType;
-
-        // 3. Activity Filter (Swimming vs Aquagym)
         const matchActivity = c.activityType === userProfile.activityType;
 
-        // 4. Age/Target Audience Filter
         let matchAudience = true;
         if (c.classType === ClassType.GROUP) {
           if (isKid) {
-            // Strict age group matching for kids
             matchAudience = c.targetAudience === TargetAudience.KIDS;
             if (c.minAge && c.maxAge) {
                matchAudience = matchAudience && (userProfile.age >= c.minAge && userProfile.age <= c.maxAge);
             }
           } else {
-            // User is older than 12
             matchAudience = c.targetAudience === TargetAudience.ADULTS;
-            // Check minAge for adults (e.g. Aquagym 60+)
             if (c.minAge) {
                matchAudience = matchAudience && (userProfile.age >= c.minAge);
             }
           }
         }
-
         return matchDay && hasSlots && matchType && matchActivity && matchAudience;
       });
       setFilteredClasses(filtered);
     }
-  }, [aiRecommendation, selectedDay, userProfile]);
+  }, [aiRecommendation, selectedDay, userProfile, step]);
 
   const handleBookClick = (cls: SwimClass) => {
     setSelectedClass(cls);
@@ -201,52 +197,61 @@ const App: React.FC = () => {
     // --- Validation Logic ---
     const userBookings = allBookings.filter(b => b.dni === userProfile.documentNumber);
 
-    // 1. Check duplicate class (same ID)
     if (userBookings.some(b => b.classId === selectedClass.id)) {
       setBookingError("Ya tienes una reserva confirmada para este horario.");
       return;
     }
 
-    // 2. Check max bookings limit (Max 2)
     if (userBookings.length >= 2) {
       setBookingError("Has alcanzado el límite máximo de 2 reservas permitidas por DNI.");
       return;
     }
 
     setIsBooking(true);
-    setBookingError(null);
-
-    // Create full record
-    const newRecord: BookingRecord = {
-      bookingTimestamp: new Date().toLocaleString(),
-      dni: userProfile.documentNumber,
-      name: userProfile.name,
-      phone: userProfile.phoneNumber,
-      age: userProfile.age,
-      classId: selectedClass.id,
-      activityType: selectedClass.activityType,
-      classType: selectedClass.classType,
-      day: selectedClass.day,
-      time: selectedClass.time,
-      teacherName: TEACHERS[selectedClass.teacherId].name,
-      level: selectedClass.level
-    };
-
-    // Simulate API call
     setTimeout(() => {
-      // Add to bookings record
-      setAllBookings(prev => [...prev, newRecord]);
-      
       setIsBooking(false);
       setIsModalOpen(false);
-      setStep('success');
-    }, 1500);
+      setStep('payment');
+    }, 1200);
+  };
+
+  const handleSimulatePayment = () => {
+    if (!selectedClass) return;
+    setIsPaymentProcessing(true);
+    
+    // Step-based simulation
+    setTimeout(() => {
+      // Create final record
+      const newRecord: BookingRecord = {
+        bookingTimestamp: new Date().toLocaleString(),
+        paymentStatus: 'Aprobado',
+        dni: userProfile.documentNumber,
+        name: userProfile.name,
+        phone: userProfile.phoneNumber,
+        age: userProfile.age,
+        classId: selectedClass.id,
+        activityType: selectedClass.activityType,
+        classType: selectedClass.classType,
+        day: selectedClass.day,
+        time: selectedClass.time,
+        teacherName: TEACHERS[selectedClass.teacherId].name,
+        level: selectedClass.level,
+        price: selectedClass.price
+      };
+
+      setPaymentDone(true);
+      setTimeout(() => {
+        setAllBookings(prev => [...prev, newRecord]);
+        setIsPaymentProcessing(false);
+        setPaymentDone(false);
+        setStep('success');
+      }, 1500);
+    }, 2500);
   };
 
   const handleAdminAuth = (e: React.FormEvent) => {
     e.preventDefault();
     if (adminCode === '31913637') {
-      // Success auth
       setIsAdminModalOpen(false);
       setShowAdminDashboard(true);
       setAdminCode('');
@@ -262,9 +267,9 @@ const App: React.FC = () => {
       return;
     }
 
-    // Format data for Excel headers
     const dataToExport = allBookings.map(record => ({
       "Fecha y Hora Reserva": record.bookingTimestamp,
+      "Estado Pago": record.paymentStatus,
       "Nombre Alumno": record.name,
       "DNI": record.dni,
       "Teléfono": record.phone,
@@ -274,17 +279,15 @@ const App: React.FC = () => {
       "Día de Clase": record.day,
       "Hora de Clase": record.time + " hs",
       "Profesor Asignado": record.teacherName,
-      "Nivel": record.level
+      "Nivel": record.level,
+      "Monto": record.price
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Reservas");
-    
-    // Generate filename with timestamp
     const dateStr = new Date().toISOString().slice(0,10);
     XLSX.writeFile(workbook, `Reservas_Obras_${dateStr}.xlsx`);
-    
     alert('El archivo Excel se ha descargado correctamente.');
   };
 
@@ -302,8 +305,6 @@ const App: React.FC = () => {
   // Render Functions
   const renderProfileStep = () => (
     <div className="w-full animate-in fade-in duration-500">
-      
-      {/* Hero Section */}
       <div className="relative rounded-3xl overflow-hidden mb-12 bg-brand-900 shadow-2xl">
         <div className="absolute inset-0">
           <img 
@@ -326,11 +327,11 @@ const App: React.FC = () => {
              Clases grupales, particulares y aquagym adaptadas a tu nivel.
            </p>
            <div className="flex flex-wrap gap-4">
-             <div className="flex items-center gap-2 text-white/80 bg-black/20 px-4 py-2 rounded-lg backdrop-blur-sm">
-                <CheckCircle size={16} className="text-green-400" /> Profesores Certificados
+             <div className="flex items-center gap-2 text-white/80 bg-black/20 px-4 py-2 rounded-lg backdrop-blur-sm text-sm">
+                <Check className="text-green-400" size={16} /> Profesores Certificados
              </div>
-             <div className="flex items-center gap-2 text-white/80 bg-black/20 px-4 py-2 rounded-lg backdrop-blur-sm">
-                <CheckCircle size={16} className="text-green-400" /> Piscina Climatizada
+             <div className="flex items-center gap-2 text-white/80 bg-black/20 px-4 py-2 rounded-lg backdrop-blur-sm text-sm">
+                <Check className="text-green-400" size={16} /> Piscina Climatizada
              </div>
            </div>
         </div>
@@ -346,20 +347,17 @@ const App: React.FC = () => {
         </div>
         
         <form onSubmit={handleProfileSubmit} className="space-y-6">
-          {/* Nombre y Documento */}
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">Nombre Completo</label>
-              <div className="relative">
-                <input 
-                  type="text" 
-                  required
-                  className="w-full pl-4 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition-all"
-                  placeholder="Ej: Juan Pérez"
-                  value={userProfile.name}
-                  onChange={(e) => setUserProfile({...userProfile, name: e.target.value})}
-                />
-              </div>
+              <input 
+                type="text" 
+                required
+                className="w-full pl-4 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition-all"
+                placeholder="Ej: Juan Pérez"
+                value={userProfile.name}
+                onChange={(e) => setUserProfile({...userProfile, name: e.target.value})}
+              />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -394,7 +392,6 @@ const App: React.FC = () => {
 
           <div className="border-t border-slate-100 my-6"></div>
 
-          {/* Preferencias de Clase */}
           <div>
             <h3 className="text-lg font-medium text-brand-900 mb-4 flex items-center gap-2">
               <Activity size={20} /> Preferencias
@@ -403,7 +400,7 @@ const App: React.FC = () => {
             <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl mb-6 flex gap-3">
               <Info className="text-blue-500 flex-shrink-0" />
               <p className="text-sm text-blue-800">
-                <strong>Política de Cursada:</strong> Los alumnos de clases grupales pueden reservar hasta <strong>dos días</strong> por semana (ej. Lunes y Miércoles).
+                <strong>Política:</strong> Alumnos grupales pueden reservar hasta <strong>dos días</strong> por semana.
               </p>
             </div>
 
@@ -450,7 +447,6 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          {/* Edad y Nivel */}
           <div className="grid grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">Edad del Alumno</label>
@@ -462,7 +458,6 @@ const App: React.FC = () => {
                 value={userProfile.age}
                 onChange={(e) => setUserProfile({...userProfile, age: parseInt(e.target.value)})}
               />
-              <p className="text-xs text-slate-400 mt-1">Mínimo 4 años</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">Nivel Estimado</label>
@@ -484,15 +479,9 @@ const App: React.FC = () => {
             className="w-full bg-brand-600 hover:bg-brand-700 disabled:opacity-70 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-brand-200 flex justify-center items-center gap-2 mt-4"
           >
             {isLoadingAI ? (
-              <>
-                <Sparkles className="animate-spin" />
-                Buscando Disponibilidad...
-              </>
+              <><Loader2 className="animate-spin" /> Buscando Disponibilidad...</>
             ) : (
-              <>
-                Ver Horarios Disponibles
-                <ChevronRight size={20} />
-              </>
+              <>Ver Horarios Disponibles <ChevronRight size={20} /></>
             )}
           </button>
         </form>
@@ -502,168 +491,251 @@ const App: React.FC = () => {
 
   const renderScheduleStep = () => {
     const currentBookings = getUserBookingCount();
-    
     return (
-    <div className="max-w-6xl mx-auto w-full animate-in fade-in duration-300">
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-        <div>
-            <button onClick={() => setStep('profile')} className="text-sm text-slate-500 hover:text-brand-600 mb-1 flex items-center gap-1">
-                &larr; Cambiar filtros
-            </button>
-            <h1 className="text-3xl font-bold text-slate-900">
-              {userProfile.activityType} - {userProfile.classType}
-            </h1>
-            <p className="text-slate-500 mt-1">
-              Mostrando horarios para {userProfile.age >= 4 && userProfile.age <= 12 ? 'Niños' : 'Adultos'} ({userProfile.age} años)
-            </p>
-            {currentBookings > 0 && (
-              <p className="text-sm text-brand-600 font-medium mt-1">
-                Reservas realizadas: {currentBookings}/2
+      <div className="max-w-6xl mx-auto w-full animate-in fade-in duration-300">
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+          <div>
+              <button onClick={() => setStep('profile')} className="text-sm text-slate-500 hover:text-brand-600 mb-1 flex items-center gap-1">
+                  &larr; Cambiar filtros
+              </button>
+              <h1 className="text-3xl font-bold text-slate-900">
+                {userProfile.activityType} - {userProfile.classType}
+              </h1>
+              <p className="text-slate-500 mt-1">
+                Para {userProfile.age >= 4 && userProfile.age <= 12 ? 'Niños' : 'Adultos'} ({userProfile.age} años)
               </p>
-            )}
-        </div>
-        
-        {/* AI Insight Card */}
-        {aiRecommendation && (
-          <div className="bg-gradient-to-r from-brand-600 to-brand-500 text-white p-4 rounded-2xl shadow-lg flex items-center gap-4 max-w-lg animate-in slide-in-from-right duration-500">
-            <div className="bg-white/20 p-3 rounded-full backdrop-blur-sm">
-                <Sparkles className="w-6 h-6 text-yellow-300" />
-            </div>
-            <div>
-                <p className="text-xs font-medium opacity-90 uppercase tracking-wider">Recomendación</p>
-                <p className="font-bold text-lg">{aiRecommendation.recommendedLevel}</p>
-                <p className="text-sm opacity-90 italic">"{aiRecommendation.motivationTip}"</p>
-            </div>
-          </div>
-        )}
-      </header>
-
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        {/* Filters */}
-        <div className="lg:col-span-1 space-y-6">
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <h3 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
-                    <Search size={18} /> Filtros Rápidos
-                </h3>
-                <div className="space-y-2">
-                    <label className="text-sm text-slate-500">Día de la semana</label>
-                    <div className="flex flex-col gap-2">
-                        <button 
-                            onClick={() => setSelectedDay('ALL')}
-                            className={`px-4 py-2 rounded-lg text-left text-sm font-medium transition-colors ${selectedDay === 'ALL' ? 'bg-brand-50 text-brand-700 border border-brand-200' : 'hover:bg-slate-50 text-slate-600'}`}
-                        >
-                            Todos los días
-                        </button>
-                        {Object.values(DayOfWeek).map(day => (
-                            <button 
-                                key={day}
-                                onClick={() => setSelectedDay(day)}
-                                className={`px-4 py-2 rounded-lg text-left text-sm font-medium transition-colors ${selectedDay === day ? 'bg-brand-50 text-brand-700 border border-brand-200' : 'hover:bg-slate-50 text-slate-600'}`}
-                            >
-                                {day}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            <div className="bg-brand-50 p-6 rounded-2xl border border-brand-100">
-                 <h3 className="font-semibold text-brand-900 mb-2 flex items-center gap-2">
-                    <Trophy size={18} /> Objetivo Sugerido
-                </h3>
-                <p className="text-sm text-brand-700 leading-relaxed">
-                    {aiRecommendation?.reasoning}
+              {currentBookings > 0 && (
+                <p className="text-sm text-brand-600 font-medium mt-1">
+                  Reservas realizadas: {currentBookings}/2
                 </p>
-                <div className="mt-4 pt-4 border-t border-brand-200">
-                    <p className="text-xs text-brand-500 uppercase font-bold tracking-wider mb-1">Enfoque Técnico</p>
-                    <p className="text-brand-800 font-medium">{aiRecommendation?.focusArea}</p>
-                </div>
+              )}
+          </div>
+          
+          {aiRecommendation && (
+            <div className="bg-gradient-to-r from-brand-600 to-brand-500 text-white p-4 rounded-2xl shadow-lg flex items-center gap-4 max-w-lg animate-in slide-in-from-right duration-500">
+              <div className="bg-white/20 p-3 rounded-full backdrop-blur-sm">
+                  <Sparkles className="w-6 h-6 text-yellow-300" />
+              </div>
+              <div>
+                  <p className="text-xs font-medium opacity-90 uppercase tracking-wider">Recomendación</p>
+                  <p className="font-bold text-lg">{aiRecommendation.recommendedLevel}</p>
+                  <p className="text-sm opacity-90 italic">"{aiRecommendation.motivationTip}"</p>
+              </div>
             </div>
-        </div>
+          )}
+        </header>
 
-        {/* Results Grid */}
-        <div className="lg:col-span-3">
-            {filteredClasses.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-64 bg-white rounded-3xl border-2 border-dashed border-slate-200 text-slate-400">
-                    <Droplets size={48} className="mb-4 opacity-50" />
-                    <p className="text-lg font-medium text-slate-900">No hay horarios disponibles.</p>
-                    <p className="text-sm mt-1 max-w-xs text-center">
-                      Para la edad y modalidad seleccionada, no encontramos cupos en este filtro.
-                    </p>
-                    <button onClick={() => setSelectedDay('ALL')} className="text-brand-600 font-semibold mt-4 hover:underline">Ver toda la semana</button>
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                    {filteredClasses.map(cls => {
-                        const teacher = TEACHERS[cls.teacherId];
-                        // Check if this specific class is already booked by user
-                        const isBooked = allBookings.some(b => b.dni === userProfile.documentNumber && b.classId === cls.id);
-                        
-                        return (
-                            <div key={cls.id} className={`bg-white rounded-2xl p-5 shadow-sm hover:shadow-md border border-slate-100 transition-all flex flex-col justify-between group ${isBooked ? 'ring-2 ring-green-500 ring-offset-2' : ''}`}>
-                                <div>
-                                    <div className="flex justify-between items-start mb-4">
-                                        <div className="bg-brand-50 text-brand-700 px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wide">
-                                            {cls.day}
-                                        </div>
-                                        {isBooked ? (
-                                           <div className="px-3 py-1 rounded-full text-xs font-bold text-green-700 bg-green-100 border border-green-200 flex items-center gap-1">
-                                             <CheckCircle size={12} /> Reservado
-                                           </div>
-                                        ) : (
-                                          <div className={`px-3 py-1 rounded-full text-xs font-bold border ${getCapacityColor(cls.bookedSlots, cls.totalSlots)}`}>
-                                              {cls.totalSlots - cls.bookedSlots} lugares
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          <div className="lg:col-span-1 space-y-6">
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                  <h3 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                      <Search size={18} /> Filtros Rápidos
+                  </h3>
+                  <div className="space-y-2">
+                      <label className="text-sm text-slate-500">Día de la semana</label>
+                      <div className="flex flex-col gap-2">
+                          <button 
+                              onClick={() => setSelectedDay('ALL')}
+                              className={`px-4 py-2 rounded-lg text-left text-sm font-medium transition-colors ${selectedDay === 'ALL' ? 'bg-brand-50 text-brand-700 border border-brand-200' : 'hover:bg-slate-50 text-slate-600'}`}
+                          >
+                              Todos los días
+                          </button>
+                          {Object.values(DayOfWeek).map(day => (
+                              <button 
+                                  key={day}
+                                  onClick={() => setSelectedDay(day)}
+                                  className={`px-4 py-2 rounded-lg text-left text-sm font-medium transition-colors ${selectedDay === day ? 'bg-brand-50 text-brand-700 border border-brand-200' : 'hover:bg-slate-50 text-slate-600'}`}
+                              >
+                                  {day}
+                              </button>
+                          ))}
+                      </div>
+                  </div>
+              </div>
+
+              <div className="bg-brand-50 p-6 rounded-2xl border border-brand-100">
+                   <h3 className="font-semibold text-brand-900 mb-2 flex items-center gap-2">
+                      <Trophy size={18} /> Objetivo Sugerido
+                  </h3>
+                  <p className="text-sm text-brand-700 leading-relaxed">
+                      {aiRecommendation?.reasoning}
+                  </p>
+                  <div className="mt-4 pt-4 border-t border-brand-200">
+                      <p className="text-xs text-brand-500 uppercase font-bold tracking-wider mb-1">Enfoque Técnico</p>
+                      <p className="text-brand-800 font-medium">{aiRecommendation?.focusArea}</p>
+                  </div>
+              </div>
+          </div>
+
+          <div className="lg:col-span-3">
+              {filteredClasses.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-64 bg-white rounded-3xl border-2 border-dashed border-slate-200 text-slate-400">
+                      <Droplets size={48} className="mb-4 opacity-50" />
+                      <p className="text-lg font-medium text-slate-900">No hay horarios disponibles.</p>
+                      <button onClick={() => setSelectedDay('ALL')} className="text-brand-600 font-semibold mt-4 hover:underline">Ver toda la semana</button>
+                  </div>
+              ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                      {filteredClasses.map(cls => {
+                          const teacher = TEACHERS[cls.teacherId];
+                          const isBooked = allBookings.some(b => b.dni === userProfile.documentNumber && b.classId === cls.id);
+                          return (
+                              <div key={cls.id} className={`bg-white rounded-2xl p-5 shadow-sm hover:shadow-md border border-slate-100 transition-all flex flex-col justify-between group ${isBooked ? 'ring-2 ring-green-500 ring-offset-2' : ''}`}>
+                                  <div>
+                                      <div className="flex justify-between items-start mb-4">
+                                          <div className="bg-brand-50 text-brand-700 px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wide">
+                                              {cls.day}
                                           </div>
-                                        )}
-                                    </div>
-                                    
-                                    <div className="flex items-center gap-3 mb-4">
-                                        <img src={teacher.photoUrl} alt={teacher.name} className="w-12 h-12 rounded-full object-cover border-2 border-slate-50" />
-                                        <div>
-                                            <p className="text-sm text-slate-500">Docente</p>
-                                            <p className="font-semibold text-slate-900">{teacher.name}</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="mb-4">
-                                        <h4 className="text-2xl font-bold text-slate-800">{cls.time} hs</h4>
-                                        <div className="flex flex-wrap gap-2 mt-2">
-                                          <span className="text-xs font-medium bg-slate-100 px-2 py-1 rounded text-slate-600">
-                                            {cls.activityType}
-                                          </span>
-                                          {cls.minAge && (
-                                            <span className="text-xs font-medium bg-brand-50 px-2 py-1 rounded text-brand-600">
-                                              {cls.minAge}{cls.maxAge ? `-${cls.maxAge}` : '+'} años
-                                            </span>
+                                          {isBooked ? (
+                                             <div className="px-3 py-1 rounded-full text-xs font-bold text-green-700 bg-green-100 border border-green-200 flex items-center gap-1">
+                                               <Check size={12} /> Reservado
+                                             </div>
+                                          ) : (
+                                            <div className={`px-3 py-1 rounded-full text-xs font-bold border ${getCapacityColor(cls.bookedSlots, cls.totalSlots)}`}>
+                                                {cls.totalSlots - cls.bookedSlots} lugares
+                                            </div>
                                           )}
-                                          {!cls.minAge && (
-                                            <span className="text-xs font-medium bg-slate-100 px-2 py-1 rounded text-slate-600">
-                                              {cls.targetAudience}
-                                            </span>
-                                          )}
-                                        </div>
-                                    </div>
-                                </div>
+                                      </div>
+                                      
+                                      <div className="flex items-center gap-3 mb-4">
+                                          <img src={teacher.photoUrl} alt={teacher.name} className="w-12 h-12 rounded-full object-cover border-2 border-slate-50" />
+                                          <div>
+                                              <p className="text-sm text-slate-500">Docente</p>
+                                              <p className="font-semibold text-slate-900">{teacher.name}</p>
+                                          </div>
+                                      </div>
 
-                                <button 
-                                    onClick={() => handleBookClick(cls)}
-                                    disabled={isBooked}
-                                    className={`w-full py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 ${
-                                      isBooked 
-                                        ? 'bg-green-100 text-green-800 cursor-default' 
-                                        : 'bg-slate-900 text-white group-hover:bg-brand-600'
-                                    }`}
-                                >
-                                    {isBooked ? 'Ya Reservado' : `Reservar ${cls.classType === ClassType.PRIVATE ? 'Particular' : 'Cupo'}`}
-                                </button>
-                            </div>
-                        );
-                    })}
-                </div>
-            )}
+                                      <div className="mb-4">
+                                          <h4 className="text-2xl font-bold text-slate-800">{cls.time} hs</h4>
+                                          <p className="text-xs font-medium text-slate-400 mt-1 uppercase tracking-wider">
+                                            {cls.activityType} • {cls.classType}
+                                          </p>
+                                      </div>
+                                  </div>
+
+                                  <button 
+                                      onClick={() => handleBookClick(cls)}
+                                      disabled={isBooked}
+                                      className={`w-full py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 ${
+                                        isBooked 
+                                          ? 'bg-green-100 text-green-800 cursor-default' 
+                                          : 'bg-slate-900 text-white group-hover:bg-brand-600'
+                                      }`}
+                                  >
+                                      {isBooked ? 'Ya Reservado' : `Seleccionar`}
+                                  </button>
+                              </div>
+                          );
+                      })}
+                  </div>
+              )}
+          </div>
         </div>
       </div>
-    </div>
+    );
+  };
+
+  const renderPaymentStep = () => {
+    if (!selectedClass) return null;
+    const teacher = TEACHERS[selectedClass.teacherId];
+
+    return (
+      <div className="max-w-4xl mx-auto w-full animate-in slide-in-from-bottom duration-500">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Summary */}
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-slate-900">Resumen de tu Reserva</h2>
+            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
+              <div className="flex items-center gap-4 border-b border-slate-50 pb-4">
+                <img src={teacher.photoUrl} className="w-16 h-16 rounded-full object-cover" />
+                <div>
+                  <h4 className="font-bold text-slate-900">{teacher.name}</h4>
+                  <p className="text-sm text-slate-500">{selectedClass.day}, {selectedClass.time} hs</p>
+                </div>
+              </div>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Actividad:</span>
+                  <span className="font-medium text-slate-900">{selectedClass.activityType}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Nivel:</span>
+                  <span className="font-medium text-slate-900">{selectedClass.level}</span>
+                </div>
+                <div className="flex justify-between border-t border-slate-50 pt-2 text-lg font-bold text-brand-600">
+                  <span>Total a pagar:</span>
+                  <span>Gs. {selectedClass.price.toLocaleString()}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-amber-50 p-4 rounded-2xl flex gap-3 border border-amber-100">
+              <ShieldCheck className="text-amber-600 shrink-0" size={20} />
+              <p className="text-xs text-amber-800 leading-relaxed">
+                Pago 100% seguro. Tu transacción está protegida por encriptación bancaria SSL de 256 bits.
+              </p>
+            </div>
+          </div>
+
+          {/* Simulated Payment Form */}
+          <div className="bg-white p-8 rounded-3xl shadow-xl border border-slate-100">
+            <div className="flex items-center gap-2 mb-8">
+              <CreditCard className="text-brand-600" size={24} />
+              <h3 className="text-lg font-bold text-slate-900">Método de Pago</h3>
+            </div>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <button className="flex flex-col items-center justify-center p-4 border-2 border-brand-500 bg-brand-50 rounded-2xl text-brand-600 font-medium">
+                  <CardIcon size={24} className="mb-2" />
+                  <span className="text-xs">Tarjeta</span>
+                </button>
+                <button className="flex flex-col items-center justify-center p-4 border border-slate-200 rounded-2xl text-slate-400 hover:bg-slate-50 transition-colors">
+                  <Waves size={24} className="mb-2" />
+                  <span className="text-xs">Transferencia</span>
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                <div className="relative">
+                  <input readOnly value="4532 •••• •••• 1092" className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 text-sm" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <input readOnly value="12/28" className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 text-sm" />
+                  <input readOnly value="•••" className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 text-sm" />
+                </div>
+              </div>
+
+              <button 
+                onClick={handleSimulatePayment}
+                disabled={isPaymentProcessing}
+                className="w-full bg-brand-600 hover:bg-brand-700 disabled:opacity-80 text-white font-bold py-4 rounded-2xl shadow-lg shadow-brand-100 transition-all flex items-center justify-center gap-3 mt-6"
+              >
+                {isPaymentProcessing ? (
+                  <>
+                    {paymentDone ? (
+                      <div className="flex items-center gap-2 animate-in zoom-in">
+                        <Check size={20} className="text-white bg-green-500 rounded-full p-0.5" />
+                        <span>¡Pago Exitoso!</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="animate-spin" size={20} />
+                        <span>Procesando pago...</span>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <>Confirmar Pago Gs. {selectedClass.price.toLocaleString()}</>
+                )}
+              </button>
+              <p className="text-[10px] text-center text-slate-400 mt-4 px-4 leading-tight">
+                Al hacer clic en confirmar pago, usted acepta nuestros términos de servicio y políticas de cancelación.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     );
   };
 
@@ -672,110 +744,83 @@ const App: React.FC = () => {
     const canBookMore = bookingCount < 2;
 
     return (
-    <div className="max-w-md mx-auto w-full text-center animate-in zoom-in duration-300">
-      <div className="bg-white p-8 rounded-3xl shadow-xl shadow-green-50 border border-green-100">
-        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600">
-            <CheckCircle size={40} strokeWidth={3} />
-        </div>
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">¡Solicitud Registrada!</h2>
-        <p className="text-slate-600 mb-6">
-            Hemos registrado tu solicitud para el <strong>{selectedClass?.day} {selectedClass?.time}hs</strong>.
-        </p>
-
-        <div className="bg-amber-50 p-4 rounded-xl mb-4 border border-amber-100 text-left flex items-start gap-3">
-          <Info className="text-amber-600 mt-0.5 flex-shrink-0" size={18} />
-          <div className="text-sm text-amber-900">
-             <strong>Pendiente de Confirmación:</strong> La asignación definitiva del cupo se realizará una vez corroborado el pago. Nos comunicaremos contigo al teléfono registrado.
+      <div className="max-w-md mx-auto w-full text-center animate-in zoom-in duration-300">
+        <div className="bg-white p-8 rounded-3xl shadow-xl shadow-green-50 border border-green-100">
+          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600 shadow-inner">
+              <Check size={40} strokeWidth={3} />
           </div>
-        </div>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">¡Reserva Confirmada!</h2>
+          <p className="text-slate-600 mb-6">
+              Tu pago ha sido procesado correctamente para el día <strong>{selectedClass?.day} a las {selectedClass?.time} hs</strong>.
+          </p>
 
-        {canBookMore ? (
-          <div className="bg-blue-50 p-4 rounded-xl mb-6 border border-blue-100 text-left flex items-start gap-3">
-            <Info className="text-blue-600 mt-0.5 flex-shrink-0" size={18} />
-            <div className="text-sm text-blue-800">
-              Llevas <strong>{bookingCount} de 2</strong> reservas permitidas. Recuerda completar tu esquema semanal.
+          <div className="bg-slate-50 p-4 rounded-xl mb-4 border border-slate-100 text-left flex items-start gap-3">
+            <div className="space-y-2 w-full">
+              <div className="flex justify-between text-xs text-slate-500 uppercase font-bold">
+                <span>Estado de Pago</span>
+                <span className="text-green-600">Aprobado</span>
+              </div>
+              <div className="flex justify-between text-xs text-slate-500 uppercase font-bold">
+                <span>Código Transacción</span>
+                <span className="text-slate-900 font-mono">#OBR-{Math.floor(Math.random()*90000)+10000}</span>
+              </div>
             </div>
           </div>
-        ) : (
-           <div className="bg-green-50 p-4 rounded-xl mb-6 border border-green-100 text-left flex items-start gap-3">
-            <CheckCircle className="text-green-600 mt-0.5 flex-shrink-0" size={18} />
-            <div className="text-sm text-green-800">
-              ¡Genial! Ya has completado tus <strong>2 reservas</strong> semanales permitidas.
-            </div>
-          </div>
-        )}
 
-        <div className="bg-slate-50 p-4 rounded-xl mb-8 border border-slate-100 text-left flex items-start gap-3">
-          <Phone className="text-slate-500 mt-0.5 flex-shrink-0" size={18} />
-          <div className="text-sm text-slate-600">
-             Enviaremos los detalles y pasos a seguir al número <strong>{userProfile.phoneNumber}</strong>.
-          </div>
-        </div>
-        
-        <div className="space-y-3">
-            {canBookMore && (
-              <button 
-                  onClick={() => setStep('schedule')}
-                  className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl transition-colors"
+          {canBookMore ? (
+            <div className="bg-blue-50 p-4 rounded-xl mb-6 border border-blue-100 text-left flex items-start gap-3">
+              <Info className="text-blue-600 mt-0.5 flex-shrink-0" size={18} />
+              <div className="text-sm text-blue-800">
+                Has completado <strong>{bookingCount} de 2</strong> reservas semanales.
+              </div>
+            </div>
+          ) : (
+             <div className="bg-green-50 p-4 rounded-xl mb-6 border border-green-100 text-left flex items-start gap-3">
+              <Check className="text-green-600 mt-0.5 flex-shrink-0" size={18} />
+              <div className="text-sm text-green-800">
+                ¡Límite alcanzado! Ya tienes tus <strong>2 reservas</strong> semanales.
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-3">
+              {canBookMore && (
+                <button 
+                    onClick={() => setStep('schedule')}
+                    className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl transition-colors shadow-md"
+                >
+                    Reservar segunda clase
+                </button>
+              )}
+              
+              <button
+                onClick={handleShare}
+                className="w-full flex items-center justify-center gap-2 text-brand-600 bg-brand-50 hover:bg-brand-100 font-bold py-3 rounded-xl transition-colors border border-brand-200"
               >
-                  Reservar segunda clase
+                <Share2 size={20} />
+                Invitar a un amigo
               </button>
-            )}
-            
-            <button
-              onClick={handleShare}
-              className="w-full flex items-center justify-center gap-2 text-brand-600 bg-brand-50 hover:bg-brand-100 font-bold py-3 rounded-xl transition-colors border border-brand-200"
-            >
-              <Share2 size={20} />
-              Invitar a un amigo
-            </button>
 
-            <button 
-                onClick={() => {
-                    setStep('profile');
-                    setUserProfile({ 
-                      age: 25, 
-                      level: ExperienceLevel.BEGINNER, 
-                      name: '', 
-                      documentNumber: '', 
-                      phoneNumber: '',
-                      activityType: ActivityType.SWIMMING,
-                      classType: ClassType.GROUP
-                    });
-                    setAiRecommendation(null);
-                }}
-                className={`w-full text-sm py-2 transition-colors mt-2 ${canBookMore ? 'text-slate-400 hover:text-slate-600' : 'bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl'}`}
-            >
-                Volver al inicio
-            </button>
+              <button 
+                  onClick={() => {
+                      setStep('profile');
+                      setUserProfile({ 
+                        age: 25, level: ExperienceLevel.BEGINNER, name: '', documentNumber: '', phoneNumber: '', activityType: ActivityType.SWIMMING, classType: ClassType.GROUP
+                      });
+                      setAiRecommendation(null);
+                  }}
+                  className={`w-full text-sm py-2 transition-colors mt-2 text-slate-400 hover:text-slate-600`}
+              >
+                  Volver al inicio
+              </button>
+          </div>
         </div>
       </div>
-    </div>
     );
   };
-  
-  // Icon helper for Success Component and Hero
-  const CheckCircle = ({ size, strokeWidth, className }: { size: number, strokeWidth?: number, className?: string }) => (
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      width={size} 
-      height={size} 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth={strokeWidth || 2} 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-      <polyline points="22 4 12 14.01 9 11.01" />
-    </svg>
-  );
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-brand-200 flex flex-col animate-in fade-in duration-700">
-      {/* Navbar */}
       <nav className="bg-white border-b border-slate-100 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
@@ -787,31 +832,11 @@ const App: React.FC = () => {
                 <span className="font-bold text-xl tracking-tight text-brand-900 md:hidden">Obras Paraguay</span>
             </div>
             <div className="flex items-center gap-4">
-                <button
-                  onClick={handleShare}
-                  className="flex items-center gap-2 text-slate-500 hover:text-brand-600 transition-colors p-2 rounded-lg hover:bg-slate-100"
-                  title="Compartir App"
-                >
-                  <Share2 size={20} />
-                  <span className="hidden md:inline text-sm font-medium">Compartir</span>
-                </button>
-
-                {userProfile.name && step !== 'profile' && (
-                    <div className="hidden md:flex items-center gap-2 text-sm font-medium text-slate-600 bg-slate-100 px-3 py-1 rounded-full">
-                        <User size={14} />
-                        {userProfile.name}
-                    </div>
-                )}
-
                  <button 
                    onClick={() => setIsAdminModalOpen(true)}
-                   className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors shadow-sm"
-                   title="Administración"
+                   className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
                  >
                    <ShieldCheck size={16} />
-                   {allBookings.length > 0 && (
-                      <span className="bg-white/20 px-1.5 rounded text-xs">{allBookings.length}</span>
-                   )}
                    <span className="hidden md:inline">Admin</span>
                  </button>
             </div>
@@ -819,16 +844,15 @@ const App: React.FC = () => {
         </div>
       </nav>
 
-      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 flex flex-col items-center flex-grow w-full">
         {step === 'profile' && renderProfileStep()}
         {step === 'schedule' && renderScheduleStep()}
+        {step === 'payment' && renderPaymentStep()}
         {step === 'success' && renderSuccessStep()}
       </main>
 
       <Footer />
 
-      {/* Booking Modal */}
       <BookingModal 
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -846,134 +870,77 @@ const App: React.FC = () => {
              <div className="p-6">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                    <Lock size={20} className="text-brand-600" />
-                    Acceso Administrativo
+                    <Lock size={20} className="text-brand-600" /> Acceso Administrativo
                   </h3>
                   <button onClick={() => setIsAdminModalOpen(false)} className="text-slate-400 hover:text-slate-600">
-                    <ArrowRight className="rotate-45" size={20} />
+                    <X size={20} />
                   </button>
                 </div>
-                <p className="text-sm text-slate-500 mb-4">
-                  Ingrese el ID de seguridad para visualizar y gestionar la base de datos de inscripciones.
-                </p>
                 <form onSubmit={handleAdminAuth}>
-                  <div className="mb-4">
-                    <input 
-                        type="password" 
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 outline-none text-center tracking-widest" 
-                        value={adminCode}
-                        onChange={e => setAdminCode(e.target.value)}
-                        placeholder="••••••••"
-                        autoFocus
-                    />
-                  </div>
-                  {adminError && <p className="text-red-500 text-sm mb-3 text-center bg-red-50 p-2 rounded-lg">{adminError}</p>}
-                  
-                  <div className="flex gap-3">
-                      <button 
-                        type="button" 
-                        onClick={() => setIsAdminModalOpen(false)} 
-                        className="flex-1 py-2.5 text-slate-600 font-medium hover:bg-slate-50 rounded-xl transition-colors"
-                      >
-                        Cancelar
-                      </button>
-                      <button 
-                        type="submit" 
-                        className="flex-1 bg-brand-600 hover:bg-brand-700 text-white py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-brand-100"
-                      >
-                        Ingresar
-                      </button>
-                  </div>
+                  <input 
+                      type="password" 
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 outline-none text-center tracking-widest mb-4" 
+                      value={adminCode}
+                      onChange={e => setAdminCode(e.target.value)}
+                      placeholder="••••••••"
+                      autoFocus
+                  />
+                  {adminError && <p className="text-red-500 text-xs mb-3 text-center">{adminError}</p>}
+                  <button type="submit" className="w-full bg-brand-600 hover:bg-brand-700 text-white py-2.5 rounded-xl font-bold transition-all shadow-lg">Ingresar</button>
                 </form>
              </div>
           </div>
         </div>
       )}
 
-      {/* Admin Dashboard / Data Visualization */}
+      {/* Admin Dashboard */}
       {showAdminDashboard && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-6xl h-[90vh] flex flex-col overflow-hidden">
-            
-            {/* Header */}
             <div className="bg-slate-900 p-6 flex justify-between items-center shrink-0">
                <div className="flex items-center gap-3">
-                  <div className="bg-brand-500 p-2 rounded-lg">
-                    <FileText className="text-white" size={24} />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-white">Panel de Reservas</h2>
-                    <p className="text-slate-400 text-xs">Visualización de inscripciones activas</p>
-                  </div>
+                  <div className="bg-brand-500 p-2 rounded-lg"><FileText className="text-white" size={24} /></div>
+                  <h2 className="text-xl font-bold text-white">Panel de Reservas</h2>
                </div>
                <div className="flex gap-3">
-                  <button 
-                     onClick={downloadExcel}
-                     className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl text-sm font-bold transition-colors shadow-lg shadow-green-900/20"
-                  >
-                     <FileSpreadsheet size={18} />
-                     Descargar Excel
+                  <button onClick={downloadExcel} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2">
+                     <FileSpreadsheet size={18} /> Excel
                   </button>
-                  <button 
-                    onClick={() => setShowAdminDashboard(false)} 
-                    className="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors"
-                  >
-                    <X size={18} />
-                    Cerrar
-                  </button>
+                  <button onClick={() => setShowAdminDashboard(false)} className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-xl text-sm font-medium">Cerrar</button>
                </div>
             </div>
-
-            {/* Table Content */}
             <div className="flex-1 overflow-auto p-6 bg-slate-50">
                {allBookings.length === 0 ? (
                  <div className="h-full flex flex-col items-center justify-center text-slate-400">
                     <Info size={48} className="mb-4 opacity-50" />
-                    <p className="text-lg font-medium text-slate-600">No hay reservas registradas en esta sesión.</p>
+                    <p className="font-medium">No hay reservas registradas.</p>
                  </div>
                ) : (
                  <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                     <table className="min-w-full divide-y divide-slate-200">
                       <thead className="bg-slate-50">
                         <tr>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Fecha</th>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Alumno</th>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Contacto</th>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Detalles Clase</th>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Docente</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">Alumno</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">Clase</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">Monto</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">Estado Pago</th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-slate-200">
                         {allBookings.map((record, index) => (
-                          <tr key={index} className="hover:bg-slate-50 transition-colors">
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                              <div className="flex flex-col">
-                                <span>{record.bookingTimestamp.split(',')[0]}</span>
-                                <span className="text-xs text-slate-400">{record.bookingTimestamp.split(',')[1]}</span>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
+                          <tr key={index} className="hover:bg-slate-50">
+                            <td className="px-6 py-4">
                                <div className="text-sm font-medium text-slate-900">{record.name}</div>
                                <div className="text-xs text-slate-500">DNI: {record.dni}</div>
-                               <div className="text-xs text-slate-500">Edad: {record.age}</div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                               <div className="flex items-center gap-1">
-                                 <Phone size={14} className="text-slate-400" />
-                                 {record.phone}
-                               </div>
+                            <td className="px-6 py-4 text-sm text-slate-600">
+                                {record.day} - {record.time}hs ({record.teacherName})
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                                <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-brand-50 text-brand-700 mb-1">
-                                  {record.activityType}
+                            <td className="px-6 py-4 text-sm font-medium">Gs. {record.price.toLocaleString()}</td>
+                            <td className="px-6 py-4">
+                                <span className="px-2 py-1 text-xs font-bold rounded-full bg-green-100 text-green-700">
+                                  {record.paymentStatus}
                                 </span>
-                                <div className="text-sm text-slate-700 font-medium">
-                                  {record.day} - {record.time}hs
-                                </div>
-                                <div className="text-xs text-slate-500">{record.level}</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                               {record.teacherName}
                             </td>
                           </tr>
                         ))}
@@ -981,11 +948,6 @@ const App: React.FC = () => {
                     </table>
                  </div>
                )}
-            </div>
-            
-            <div className="p-4 bg-white border-t border-slate-200 text-xs text-slate-500 flex justify-between">
-               <span>Total Registros: {allBookings.length}</span>
-               <span>ID Seguridad: Verificado</span>
             </div>
           </div>
         </div>
