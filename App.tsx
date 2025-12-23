@@ -5,6 +5,7 @@ import { SwimClass, DayOfWeek, ExperienceLevel, AIRecommendation, UserProfile, A
 import { getSwimmingRecommendation } from './services/geminiService';
 import { BookingModal } from './components/BookingModal';
 import * as XLSX from 'xlsx';
+import { Analytics } from '@vercel/analytics/react';
 
 // Extended interface to store full details for Excel
 interface BookingRecord {
@@ -952,6 +953,7 @@ const App: React.FC = () => {
           </div>
         </div>
       )}
+      <Analytics />
     </div>
   );
 };
