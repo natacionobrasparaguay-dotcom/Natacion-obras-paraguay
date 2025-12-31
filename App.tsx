@@ -86,6 +86,11 @@ const App: React.FC = () => {
     setTimeout(() => setShowConfirmation(false), 8000);
   };
 
+  const handleUpdateClassesFromAdmin = (newClasses: SwimmingClass[]) => {
+    setClasses(newClasses);
+    localStorage.setItem('obras_paraguay_classes', JSON.stringify(newClasses));
+  };
+
   const MAP_URL = "https://www.google.com/maps/search/?api=1&query=Paraguay+2060,+CABA";
 
   return (
@@ -326,7 +331,11 @@ const App: React.FC = () => {
       )}
 
       {showAdmin && (
-        <AdminPanel onClose={() => setShowAdmin(false)} />
+        <AdminPanel 
+          onClose={() => setShowAdmin(false)} 
+          currentClasses={classes} 
+          onUpdateClasses={handleUpdateClassesFromAdmin}
+        />
       )}
 
       {showReglamento && (
