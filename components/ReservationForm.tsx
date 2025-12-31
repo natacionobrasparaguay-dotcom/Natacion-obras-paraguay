@@ -19,17 +19,18 @@ const ReservationForm: React.FC<ReservationFormProps> = ({ selectedClass, onClos
   const [emailError, setEmailError] = useState('');
 
   const validateEmail = (email: string) => {
-    if (!email) return true;
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(email);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.email && !validateEmail(formData.email)) {
-      setEmailError('Formato inválido.');
+    
+    if (!validateEmail(formData.email)) {
+      setEmailError('Por favor, ingrese un correo electrónico válido.');
       return;
     }
+    
     setEmailError('');
     onSubmit(formData);
   };
@@ -48,30 +49,61 @@ const ReservationForm: React.FC<ReservationFormProps> = ({ selectedClass, onClos
         <form onSubmit={handleSubmit} className="p-6 space-y-5 overflow-y-auto no-scrollbar">
           <div className="bg-amber-50 border-l-4 border-amber-400 p-3 rounded-r-xl">
             <p className="text-[10px] text-amber-800 font-bold leading-tight uppercase tracking-tight">
-              Abonar en recepción para confirmar vacante.
+              Todos los campos son obligatorios. Abonar en recepción para confirmar.
             </p>
           </div>
 
           <div className="space-y-4">
             <div>
               <label className="block text-[10px] font-black text-slate-400 uppercase mb-1 tracking-widest">Nombre del Alumno/a</label>
-              <input required type="text" className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-blue-500" value={formData.studentFullName} onChange={e => setFormData({...formData, studentFullName: e.target.value})} />
+              <input 
+                required 
+                type="text" 
+                placeholder="Ej: Juan Pérez"
+                className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-blue-500 transition-all" 
+                value={formData.studentFullName} 
+                onChange={e => setFormData({...formData, studentFullName: e.target.value})} 
+              />
             </div>
 
             <div>
               <label className="block text-[10px] font-black text-slate-400 uppercase mb-1 tracking-widest">DNI del Alumno/a</label>
-              <input required type="text" className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-blue-500" value={formData.dni} onChange={e => setFormData({...formData, dni: e.target.value})} />
+              <input 
+                required 
+                type="text" 
+                placeholder="Sin puntos ni espacios"
+                className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-blue-500 transition-all" 
+                value={formData.dni} 
+                onChange={e => setFormData({...formData, dni: e.target.value})} 
+              />
             </div>
 
             <div>
               <label className="block text-[10px] font-black text-slate-400 uppercase mb-1 tracking-widest">WhatsApp / Teléfono</label>
-              <input required type="tel" className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-blue-500" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
+              <input 
+                required 
+                type="tel" 
+                placeholder="Ej: 1122334455"
+                className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-blue-500 transition-all" 
+                value={formData.phone} 
+                onChange={e => setFormData({...formData, phone: e.target.value})} 
+              />
             </div>
 
             <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase mb-1 tracking-widest">Email (Opcional)</label>
-              <input type="email" className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-blue-500" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
-              {emailError && <p className="text-red-500 text-[9px] font-black mt-1">{emailError}</p>}
+              <label className="block text-[10px] font-black text-slate-400 uppercase mb-1 tracking-widest">Email Obligatorio</label>
+              <input 
+                required 
+                type="email" 
+                placeholder="Ej: usuario@gmail.com"
+                className={`w-full bg-slate-50 border-2 rounded-xl px-4 py-3 text-sm font-bold outline-none transition-all ${emailError ? 'border-red-500 focus:border-red-600' : 'border-slate-100 focus:border-blue-500'}`} 
+                value={formData.email} 
+                onChange={e => {
+                  setFormData({...formData, email: e.target.value});
+                  if (emailError) setEmailError('');
+                }} 
+              />
+              {emailError && <p className="text-red-500 text-[10px] font-black mt-1 uppercase tracking-tight">{emailError}</p>}
             </div>
           </div>
 
@@ -80,7 +112,7 @@ const ReservationForm: React.FC<ReservationFormProps> = ({ selectedClass, onClos
               Confirmar Solicitud
             </button>
             <p className="text-[9px] text-center text-slate-400 mt-4 font-bold uppercase tracking-wider">
-              Sistema de pre-inscripción Obras Paraguay
+              La vacante se reserva por 48hs hábiles
             </p>
           </div>
         </form>

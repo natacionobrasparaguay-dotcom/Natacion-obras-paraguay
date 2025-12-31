@@ -67,7 +67,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, currentClasses, onUpda
     return records.filter(r => 
       r.studentFullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       r.dni.includes(searchTerm) ||
-      r.phone.includes(searchTerm)
+      r.phone.includes(searchTerm) ||
+      r.email.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [records, searchTerm]);
 
@@ -86,14 +87,15 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, currentClasses, onUpda
   const executeDownload = () => {
     if (records.length === 0) return;
     
-    const headers = ["Fecha Registro", "Alumno/a", "DNI", "WhatsApp / Teléfono", "Email", "Categoría", "Nivel de Clase", "Horario", "Días"];
+    // Encabezados con todos los datos requeridos
+    const headers = ["Fecha Registro", "Alumno/a", "DNI", "WhatsApp", "Email", "Categoría", "Nivel", "Horario", "Días"];
     
     const rows = records.map(r => [
       new Date(r.timestamp).toLocaleString('es-AR'),
       r.studentFullName,
       r.dni,
       r.phone,
-      r.email || 'No provisto',
+      r.email,
       r.classCategory,
       r.classLevel,
       r.classTime,
@@ -112,7 +114,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, currentClasses, onUpda
     const dateStr = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
     
     link.setAttribute("href", url);
-    link.setAttribute("download", `reporte_reservas_obras_${dateStr}.csv`);
+    link.setAttribute("download", `reservas_natacion_obras_${dateStr}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -195,23 +197,23 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, currentClasses, onUpda
               <div className="relative flex-1 sm:w-80">
                 <input 
                   type="text"
-                  placeholder="Buscar..."
+                  placeholder="Buscar por nombre, DNI o email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full bg-slate-100 border-none rounded-xl sm:rounded-2xl pl-10 pr-4 py-2.5 sm:py-3.5 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 outline-none font-bold"
                 />
                 <svg className="absolute left-3 top-2.5 sm:top-3.5 text-slate-400" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
               </div>
-              <button onClick={executeDownload} disabled={records.length === 0} className="p-3 sm:px-6 sm:py-3.5 bg-emerald-600 text-white rounded-xl sm:rounded-2xl text-[10px] font-black uppercase flex items-center gap-2 active:scale-90">
+              <button onClick={executeDownload} disabled={records.length === 0} className="p-3 sm:px-6 sm:py-3.5 bg-emerald-600 text-white rounded-xl sm:rounded-2xl text-[10px] font-black uppercase flex items-center gap-2 active:scale-90 transition-all shadow-lg shadow-emerald-500/20">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-                <span className="hidden sm:inline">Exportar Excel</span>
+                <span className="hidden sm:inline">Descargar Excel</span>
               </button>
-              <button onClick={handleClearHistory} className="p-3 sm:p-3.5 bg-red-50 text-red-500 rounded-xl sm:rounded-2xl active:scale-90">
+              <button onClick={handleClearHistory} className="p-3 sm:p-3.5 bg-red-50 text-red-500 rounded-xl sm:rounded-2xl active:scale-90 hover:bg-red-500 hover:text-white transition-all">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
               </button>
             </>
           ) : (
-            <button onClick={handleSaveInventory} className="w-full sm:w-auto bg-blue-600 text-white px-6 py-3 rounded-xl sm:rounded-2xl text-[10px] font-black uppercase tracking-widest active:scale-95">
+            <button onClick={handleSaveInventory} className="w-full sm:w-auto bg-blue-600 text-white px-6 py-3 rounded-xl sm:rounded-2xl text-[10px] font-black uppercase tracking-widest active:scale-95 shadow-lg shadow-blue-500/20">
                 {saveSuccess ? 'Guardado' : 'Guardar Cupos'}
             </button>
           )}
@@ -225,22 +227,23 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, currentClasses, onUpda
         {view === 'records' ? (
           filteredRecords.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-slate-300">
-               <p className="text-xl font-black">Sin registros</p>
+               <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="mb-4 opacity-20"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+               <p className="text-xl font-black">Sin registros encontrados</p>
             </div>
           ) : (
             <div className="bg-white rounded-[2rem] border border-slate-200 shadow-xl overflow-x-auto">
-              <table className="w-full text-left min-w-[600px]">
+              <table className="w-full text-left min-w-[800px]">
                 <thead className="bg-slate-50 border-b border-slate-200">
                   <tr>
                     <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase">Alumno/a</th>
-                    <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase text-center">Clase</th>
-                    <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase">WhatsApp</th>
+                    <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase text-center">Clase/Nivel</th>
+                    <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase">Contacto</th>
                     <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase text-right">Fecha</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {filteredRecords.map((r, i) => (
-                    <tr key={i} className="hover:bg-blue-50/40">
+                    <tr key={i} className="hover:bg-blue-50/40 transition-colors">
                       <td className="px-6 py-5">
                         <div className="flex flex-col">
                           <span className="text-sm font-black text-slate-800 leading-tight">{r.studentFullName}</span>
@@ -249,12 +252,15 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, currentClasses, onUpda
                       </td>
                       <td className="px-6 py-5 text-center">
                         <div className="flex flex-col items-center">
-                          <span className="text-[10px] font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-full whitespace-nowrap">{r.classLevel}</span>
-                          <span className="text-[8px] font-medium text-slate-400 mt-1">{r.classTime}</span>
+                          <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full whitespace-nowrap mb-1">{r.classLevel}</span>
+                          <span className="text-[8px] font-black text-slate-400 uppercase">{r.classTime}</span>
                         </div>
                       </td>
                       <td className="px-6 py-5">
-                        <span className="text-[10px] font-bold text-emerald-600">{r.phone}</span>
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-bold text-emerald-600 mb-0.5">{r.phone}</span>
+                          <span className="text-[9px] font-medium text-slate-500 italic">{r.email}</span>
+                        </div>
                       </td>
                       <td className="px-6 py-5 text-right">
                          <span className="text-[10px] font-bold text-slate-400">{new Date(r.timestamp).toLocaleDateString()}</span>
@@ -275,15 +281,18 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, currentClasses, onUpda
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                         {tempClasses.filter(c => c.category === category).map(c => (
-                            <div key={c.id} className="bg-white border-2 border-slate-100 rounded-2xl p-6">
+                            <div key={c.id} className="bg-white border-2 border-slate-100 rounded-2xl p-6 hover:border-blue-200 transition-all group">
                                 <h4 className="font-black text-slate-800 text-sm mb-1">{c.level}</h4>
                                 <p className="text-[9px] font-black text-slate-400 uppercase mb-4">{c.time}</p>
-                                <input 
-                                    type="number"
-                                    value={c.remainingSlots}
-                                    onChange={(e) => handleSlotChange(c.id, parseInt(e.target.value) || 0)}
-                                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-xl font-black text-center"
-                                />
+                                <div className="relative">
+                                  <input 
+                                      type="number"
+                                      value={c.remainingSlots}
+                                      onChange={(e) => handleSlotChange(c.id, parseInt(e.target.value) || 0)}
+                                      className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-xl font-black text-center focus:border-blue-500 transition-all outline-none"
+                                  />
+                                  <span className="absolute -top-2 -right-2 bg-blue-100 text-blue-600 text-[8px] font-black px-2 py-1 rounded-lg">CUPOS</span>
+                                </div>
                             </div>
                         ))}
                     </div>
