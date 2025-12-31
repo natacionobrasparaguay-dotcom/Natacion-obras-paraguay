@@ -38,7 +38,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, currentClasses, onUpda
   const [downloadError, setDownloadError] = useState('');
 
   const SECURITY_ID = '31913637';
-  const DOWNLOAD_PIN = '2060'; 
+  const DOWNLOAD_PIN = '31913637'; // PIN actualizado según solicitud
 
   useEffect(() => {
     if (isAuthorized) {
