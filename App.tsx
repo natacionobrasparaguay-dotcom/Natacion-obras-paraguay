@@ -87,10 +87,7 @@ const App: React.FC = () => {
     setTimeout(() => setShowConfirmation(false), 6000);
   };
 
-  const scrollToLocation = (e: React.MouseEvent) => {
-    e.preventDefault();
-    document.getElementById('sede-location')?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const MAP_URL = "https://www.google.com/maps/search/?api=1&query=Paraguay+2060,+CABA";
 
   return (
     <div className="min-h-screen relative font-sans selection:bg-blue-100 selection:text-blue-900">
@@ -113,12 +110,14 @@ const App: React.FC = () => {
           <span className="text-slate-900 font-black text-xl tracking-tighter hidden sm:block">Obras Paraguay</span>
         </div>
         <div className="flex items-center gap-4">
-            <button 
-                onClick={scrollToLocation}
+            <a 
+                href={MAP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="hidden md:flex text-slate-500 font-black text-[10px] uppercase tracking-widest hover:text-blue-600 transition-colors"
             >
                 Sede CABA
-            </button>
+            </a>
             <button 
               onClick={() => setShowAdmin(true)}
               className="bg-slate-900/10 hover:bg-slate-900/20 backdrop-blur-md text-slate-900 px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-3 transition-all border border-slate-900/10"
@@ -249,7 +248,7 @@ const App: React.FC = () => {
         </section>
 
         {/* Benefits Section */}
-        <section className="bg-slate-900/95 backdrop-blur-2xl rounded-[4rem] p-12 lg:p-24 text-white shadow-4xl overflow-hidden relative border border-white/10 mb-32">
+        <section className="bg-slate-900/95 backdrop-blur-2xl rounded-[4rem] p-12 lg:p-24 text-white shadow-4xl overflow-hidden relative border border-white/10 mb-40">
           <div className="absolute top-0 right-0 w-1/2 h-full opacity-10 pointer-events-none">
              <img src="https://images.unsplash.com/photo-1519861531473-9200362f46b3?auto=format&fit=crop&q=80&w=1200" alt="Overlay" className="w-full h-full object-cover" />
           </div>
@@ -280,37 +279,6 @@ const App: React.FC = () => {
             </div>
           </div>
         </section>
-
-        {/* Sede Visual Section - REPLACES CONVENTIONAL MAP */}
-        <section id="sede-location" className="mb-32 relative group overflow-hidden rounded-[4rem] shadow-5xl">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-900/90 via-blue-900/40 to-transparent z-10"></div>
-            <img 
-                src="https://images.unsplash.com/photo-1438029071396-1e831a7fa6d8?auto=format&fit=crop&q=80&w=1920" 
-                alt="Nadador en nuestra piscina" 
-                className="w-full h-[500px] object-cover transition-transform duration-[3000ms] group-hover:scale-110" 
-            />
-            <div className="absolute inset-0 z-20 flex items-center p-12 lg:p-24">
-                <div className="max-w-xl text-white">
-                    <div className="inline-flex items-center gap-2 bg-blue-500/30 backdrop-blur-md px-4 py-2 rounded-full border border-blue-400/30 mb-6">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-                        <span className="text-[10px] font-black uppercase tracking-widest">Nuestra Pileta</span>
-                    </div>
-                    <h2 className="text-5xl font-black mb-6 tracking-tighter leading-none">Vení a Entrenar <br/> a CABA</h2>
-                    <p className="text-2xl font-black text-blue-300 mb-8">Paraguay 2060, CABA</p>
-                    <div className="flex flex-wrap gap-4">
-                        <a 
-                            href="https://www.google.com/maps/search/?api=1&query=Paraguay+2060,+CABA" 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="bg-white text-slate-900 px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-50 transition-all flex items-center gap-3"
-                        >
-                            Ver en Google Maps
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></svg>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </section>
       </main>
 
       {/* Footer */}
@@ -328,12 +296,14 @@ const App: React.FC = () => {
             </div>
             <div className="flex flex-wrap gap-x-16 gap-y-8 justify-center text-[11px] font-black text-slate-500 uppercase tracking-[0.25em]">
               <button onClick={() => setShowReglamento(true)} className="hover:text-blue-600 transition-all hover:scale-105">Reglamento</button>
-              <button 
-                onClick={scrollToLocation}
+              <a 
+                href={MAP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="hover:text-blue-600 transition-all hover:scale-105"
               >
                 Ubicación
-              </button>
+              </a>
               <a href="#" className="hover:text-blue-600 transition-all hover:scale-105">Soporte</a>
             </div>
             <div className="text-right">
