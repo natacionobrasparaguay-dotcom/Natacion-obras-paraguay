@@ -128,22 +128,9 @@ const App: React.FC = () => {
       </nav>
 
       {/* Hero Section */}
-      <header className="relative h-[720px] flex items-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-blue-900/60 via-blue-900/40 to-slate-900/80 z-10"></div>
-        <img 
-          src="https://images.unsplash.com/photo-1585129014169-2a9009859f5b?q=80&w=1920" 
-          alt="Niño nadando alegremente con antiparras en la pileta" 
-          className="absolute inset-0 w-full h-full object-cover object-center"
-          style={{ animation: 'slow-zoom 30s infinite alternate linear' }}
-        />
-        <style>
-          {`
-            @keyframes slow-zoom {
-              from { transform: scale(1); }
-              to { transform: scale(1.15); }
-            }
-          `}
-        </style>
+      <header className="relative h-[640px] flex items-center overflow-hidden bg-blue-900">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-800 to-slate-900 z-10 opacity-90"></div>
+        
         <div className="container mx-auto px-6 relative z-20 text-white">
           <div className="max-w-3xl">
             <div className="flex items-center gap-3 mb-6 mt-16 sm:mt-0 animate-in fade-in slide-in-from-left-4 duration-700">
