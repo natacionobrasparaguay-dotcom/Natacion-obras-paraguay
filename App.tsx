@@ -87,8 +87,13 @@ const App: React.FC = () => {
     setTimeout(() => setShowConfirmation(false), 6000);
   };
 
+  const scrollToLocation = (e: React.MouseEvent) => {
+    e.preventDefault();
+    document.getElementById('sede-location')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
-    <div className="min-h-screen relative font-sans">
+    <div className="min-h-screen relative font-sans selection:bg-blue-100 selection:text-blue-900">
       {/* Background Image Container */}
       <div className="fixed inset-0 z-0">
         <img 
@@ -99,31 +104,39 @@ const App: React.FC = () => {
         <div className="absolute inset-0 bg-slate-50/90"></div>
       </div>
 
-      {/* Top Navbar with Admin Access */}
-      <nav className="absolute top-0 left-0 w-full z-30 px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <div className="bg-blue-600/20 backdrop-blur-md p-2 rounded-xl text-blue-900 border border-blue-900/10">
+      {/* Top Navbar */}
+      <nav className="absolute top-0 left-0 w-full z-30 px-6 py-6 flex justify-between items-center max-w-7xl mx-auto left-0 right-0">
+        <div className="flex items-center gap-2 group cursor-default">
+          <div className="bg-blue-600/20 backdrop-blur-md p-2 rounded-xl text-blue-900 border border-blue-900/10 group-hover:scale-110 transition-transform">
             <ICONS.Waves />
           </div>
-          <span className="text-slate-900 font-black text-lg tracking-tight hidden sm:block">Obras Paraguay</span>
+          <span className="text-slate-900 font-black text-xl tracking-tighter hidden sm:block">Obras Paraguay</span>
         </div>
-        <button 
-          onClick={() => setShowAdmin(true)}
-          className="bg-slate-900/10 hover:bg-slate-900/20 backdrop-blur-md text-slate-900 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-2 transition-all border border-slate-900/10"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
-          Acceso Admin
-        </button>
+        <div className="flex items-center gap-4">
+            <button 
+                onClick={scrollToLocation}
+                className="hidden md:flex text-slate-500 font-black text-[10px] uppercase tracking-widest hover:text-blue-600 transition-colors"
+            >
+                Sede CABA
+            </button>
+            <button 
+              onClick={() => setShowAdmin(true)}
+              className="bg-slate-900/10 hover:bg-slate-900/20 backdrop-blur-md text-slate-900 px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-3 transition-all border border-slate-900/10"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
+              Admin
+            </button>
+        </div>
       </nav>
 
       {/* Hero Section */}
-      <header className="relative h-[650px] flex items-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-blue-900/50 via-blue-900/40 to-slate-900/80 z-10"></div>
+      <header className="relative h-[720px] flex items-center overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-900/60 via-blue-900/40 to-slate-900/80 z-10"></div>
         <img 
-          src="https://images.unsplash.com/photo-1519315901367-f34ff9154487?q=80&w=1920" 
-          alt="Nadador Profesional en Obras Paraguay" 
-          className="absolute inset-0 w-full h-full object-cover object-center animate-in zoom-in-110 duration-[20000ms] repeat-infinite alternate"
-          style={{ animation: 'slow-zoom 25s infinite alternate' }}
+          src="https://images.unsplash.com/photo-1600965962102-9d261a2179d1?q=80&w=1920" 
+          alt="Nadador en acción estilo mariposa" 
+          className="absolute inset-0 w-full h-full object-cover object-center"
+          style={{ animation: 'slow-zoom 30s infinite alternate linear' }}
         />
         <style>
           {`
@@ -135,19 +148,27 @@ const App: React.FC = () => {
         </style>
         <div className="container mx-auto px-6 relative z-20 text-white">
           <div className="max-w-3xl">
-            <div className="flex items-center gap-3 mb-6 mt-12 sm:mt-0">
+            <div className="flex items-center gap-3 mb-6 mt-16 sm:mt-0 animate-in fade-in slide-in-from-left-4 duration-700">
               <div className="bg-blue-500 p-2 rounded-xl shadow-lg shadow-blue-500/30">
                 <ICONS.Waves />
               </div>
-              <span className="font-bold tracking-widest text-sm uppercase drop-shadow-md">Entrenamiento de Elite</span>
+              <span className="font-bold tracking-[0.25em] text-xs uppercase drop-shadow-md opacity-90">Sede Paraguay 2060, CABA</span>
             </div>
-            <h1 className="text-5xl md:text-7xl font-black mb-6 leading-tight drop-shadow-2xl">
-              Dominá el Agua <br/>
-              <span className="text-blue-300">Con los Mejores</span>
+            <h1 className="text-6xl md:text-8xl font-black mb-8 leading-[0.9] tracking-tighter drop-shadow-2xl animate-in fade-in slide-in-from-left-6 duration-1000">
+              Nadadores de <br/>
+              <span className="text-blue-300">Alto Nivel</span>
             </h1>
-            <p className="text-xl text-blue-50 font-medium leading-relaxed max-w-xl mb-8 opacity-95 drop-shadow-md">
-              En Obras Paraguay transformamos tu técnica. Desde los primeros pasos hasta el nado profesional en nuestra sede de Paraguay 2060, CABA.
+            <p className="text-xl md:text-2xl text-blue-50 font-medium leading-relaxed max-w-xl mb-10 opacity-95 drop-shadow-md animate-in fade-in slide-in-from-left-8 duration-1000 delay-200">
+              Entrená en nuestra pileta semi-olímpica climatizada. Técnica profesional para todas las edades en el corazón de Buenos Aires.
             </p>
+            <div className="flex flex-wrap gap-4 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500">
+                <button 
+                  onClick={() => document.getElementById('grid-horarios')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="bg-blue-600 hover:bg-blue-500 text-white px-10 py-5 rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-2xl shadow-blue-500/40 active:scale-95"
+                >
+                    Ver Horarios
+                </button>
+            </div>
           </div>
         </div>
       </header>
@@ -155,13 +176,13 @@ const App: React.FC = () => {
       {/* Main Content */}
       <main className="container mx-auto px-6 -mt-24 relative z-30">
         {/* Tabs - Categories */}
-        <div className="bg-white/80 backdrop-blur-xl p-2 rounded-3xl shadow-2xl flex flex-wrap gap-2 max-w-fit mx-auto mb-8 border border-white/40 justify-center">
+        <div className="bg-white/80 backdrop-blur-2xl p-2.5 rounded-[2.5rem] shadow-3xl flex flex-wrap gap-2.5 max-w-fit mx-auto mb-10 border border-white/50 justify-center">
           <button 
             onClick={() => setActiveTab(Category.KIDS)}
-            className={`px-8 py-5 rounded-2xl font-black transition-all flex items-center gap-3 ${
+            className={`px-10 py-6 rounded-[1.8rem] font-black transition-all flex items-center gap-4 ${
               activeTab === Category.KIDS 
-                ? 'bg-blue-600 text-white shadow-xl shadow-blue-500/20 scale-105' 
-                : 'text-slate-500 hover:bg-white/50'
+                ? 'bg-blue-600 text-white shadow-2xl shadow-blue-500/30 scale-105' 
+                : 'text-slate-500 hover:bg-white/60'
             }`}
           >
             <ICONS.Users />
@@ -169,10 +190,10 @@ const App: React.FC = () => {
           </button>
           <button 
             onClick={() => setActiveTab(Category.ADULTS)}
-            className={`px-8 py-5 rounded-2xl font-black transition-all flex items-center gap-3 ${
+            className={`px-10 py-6 rounded-[1.8rem] font-black transition-all flex items-center gap-4 ${
               activeTab === Category.ADULTS 
-                ? 'bg-blue-600 text-white shadow-xl shadow-blue-500/20 scale-105' 
-                : 'text-slate-500 hover:bg-white/50'
+                ? 'bg-blue-600 text-white shadow-2xl shadow-blue-500/30 scale-105' 
+                : 'text-slate-500 hover:bg-white/60'
             }`}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 20a6 6 0 0 0-12 0"/><circle cx="12" cy="10" r="4"/><circle cx="12" cy="12" r="10"/></svg>
@@ -180,10 +201,10 @@ const App: React.FC = () => {
           </button>
           <button 
             onClick={() => setActiveTab(Category.ACUAGYM)}
-            className={`px-8 py-5 rounded-2xl font-black transition-all flex items-center gap-3 ${
+            className={`px-10 py-6 rounded-[1.8rem] font-black transition-all flex items-center gap-4 ${
               activeTab === Category.ACUAGYM 
-                ? 'bg-blue-600 text-white shadow-xl shadow-blue-500/20 scale-105' 
-                : 'text-slate-500 hover:bg-white/50'
+                ? 'bg-blue-600 text-white shadow-2xl shadow-blue-500/30 scale-105' 
+                : 'text-slate-500 hover:bg-white/60'
             }`}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2c-4 0-8 .5-8 4v10c0 3.5 4 4 8 4s8-.5 8-4V6c0-3.5-4-4-8-4z"/><path d="M12 18s-6-1.5-6-4"/><path d="M12 14s-6-1.5-6-4"/><path d="M12 10s-6-1.5-6-4"/></svg>
@@ -192,14 +213,14 @@ const App: React.FC = () => {
         </div>
 
         {/* Level Filters */}
-        <div className="flex flex-wrap justify-center gap-3 mb-16 animate-in fade-in slide-in-from-top-4 duration-500">
+        <div className="flex flex-wrap justify-center gap-4 mb-20 animate-in fade-in slide-in-from-top-4 duration-700">
           {availableLevels.map(level => (
             <button
               key={level}
               onClick={() => setActiveLevel(level)}
-              className={`px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all border-2 ${
+              className={`px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.25em] transition-all border-2 ${
                 activeLevel === level
-                  ? 'bg-slate-900 text-white border-slate-900 shadow-xl'
+                  ? 'bg-slate-900 text-white border-slate-900 shadow-2xl'
                   : 'bg-white/60 backdrop-blur-md text-slate-500 border-white/80 hover:border-blue-300 hover:text-blue-600'
               }`}
             >
@@ -209,86 +230,118 @@ const App: React.FC = () => {
         </div>
 
         {/* Info Grid */}
-        <section className="mb-32 text-center">
-            <h2 className="text-4xl font-black text-slate-900 mb-4 tracking-tight">Horarios Disponibles</h2>
-            <p className="text-slate-600 mb-12 max-w-2xl mx-auto font-medium">Contamos con andariveles divididos por nivel para que tu experiencia en el agua sea cómoda y productiva.</p>
+        <section id="grid-horarios" className="mb-40 text-center">
+            <h2 className="text-5xl font-black text-slate-900 mb-6 tracking-tighter">Reserva tu Vacante</h2>
+            <p className="text-slate-600 mb-16 max-w-2xl mx-auto font-medium text-lg">Elegí tu nivel y horario preferido. Las vacantes se actualizan en tiempo real.</p>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 min-h-[400px]">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 min-h-[400px]">
               {filteredClasses.length > 0 ? (
                 filteredClasses.map(c => (
                   <ClassCard key={c.id} swimmingClass={c} onBook={setSelectedClassId} />
                 ))
               ) : (
-                <div className="col-span-full py-24 bg-white/40 backdrop-blur-md rounded-[3rem] border-4 border-dashed border-white/60 text-slate-400 font-bold flex flex-col items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="mb-6 opacity-30"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                  No se encontraron clases disponibles para estos filtros.
+                <div className="col-span-full py-32 bg-white/40 backdrop-blur-md rounded-[4rem] border-4 border-dashed border-white/60 text-slate-400 font-bold flex flex-col items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="mb-8 opacity-20"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                  No hay clases que coincidan con los filtros seleccionados.
                 </div>
               )}
             </div>
         </section>
 
         {/* Benefits Section */}
-        <section className="bg-slate-900/95 backdrop-blur-xl rounded-[3.5rem] p-12 lg:p-20 text-white shadow-3xl overflow-hidden relative border border-white/10 mb-20">
+        <section className="bg-slate-900/95 backdrop-blur-2xl rounded-[4rem] p-12 lg:p-24 text-white shadow-4xl overflow-hidden relative border border-white/10 mb-32">
           <div className="absolute top-0 right-0 w-1/2 h-full opacity-10 pointer-events-none">
              <img src="https://images.unsplash.com/photo-1519861531473-9200362f46b3?auto=format&fit=crop&q=80&w=1200" alt="Overlay" className="w-full h-full object-cover" />
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-            <div>
-              <h2 className="text-5xl font-black mb-10 leading-[1.1] tracking-tighter">Tu Progresión es <br/>Nuestro Objetivo</h2>
-              <div className="space-y-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
+            <div className="relative z-10">
+              <h2 className="text-6xl font-black mb-12 leading-[1.05] tracking-tighter">Entrenamiento Sin Límites</h2>
+              <div className="space-y-12">
                 {[
-                  { title: "Técnica Depurada", desc: "Nuestros profesores se enfocan en la hidrodinámica y el estilo para maximizar tu rendimiento." },
-                  { title: "Sede Paraguay 2060", desc: "Instalaciones de primer nivel en el corazón de CABA, diseñadas para tu comodidad." },
-                  { title: "Comunidad Deportiva", desc: "Formá parte del club más emblemático, donde el deporte es nuestra pasión compartida." }
+                  { title: "Técnica Profesional", desc: "Perfeccioná tus estilos con seguimiento personalizado de expertos federados." },
+                  { title: "Sede Paraguay 2060", desc: "Instalaciones de primer nivel en Recoleta/CABA, con vestuarios climatizados." },
+                  { title: "Comunidad Obras", desc: "Formá parte de un club histórico dedicado a la excelencia deportiva." }
                 ].map((item, i) => (
-                  <div key={i} className="flex gap-6 group">
-                    <div className="bg-blue-600/30 p-4 rounded-3xl h-fit group-hover:bg-blue-600 transition-all duration-300 border border-blue-400/20">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  <div key={i} className="flex gap-8 group">
+                    <div className="bg-blue-600/30 p-5 rounded-3xl h-fit group-hover:bg-blue-600 transition-all duration-300 border border-blue-400/20 group-hover:scale-110">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                     </div>
                     <div>
-                      <h4 className="font-black text-2xl mb-2">{item.title}</h4>
+                      <h4 className="font-black text-2xl mb-3 tracking-tight">{item.title}</h4>
                       <p className="text-blue-100/70 font-medium leading-relaxed text-lg">{item.desc}</p>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
-            <div className="relative rounded-[3rem] overflow-hidden shadow-4xl border-4 border-white/10 aspect-square">
-              <img src="https://images.unsplash.com/photo-1530549387074-d56a992d5256?auto=format&fit=crop&q=80&w=1000" alt="Nadador en Acción" className="w-full h-full object-cover hover:scale-110 transition-transform duration-[1500ms]" />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent"></div>
+            <div className="relative rounded-[3.5rem] overflow-hidden shadow-5xl border-8 border-white/5 aspect-square lg:aspect-auto lg:h-[600px]">
+              <img src="https://images.unsplash.com/photo-1516738901171-8eb4fc13bd20?auto=format&fit=crop&q=80&w=1000" alt="Perspectiva subacuática profesional" className="w-full h-full object-cover hover:scale-110 transition-transform duration-[2000ms]" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent"></div>
             </div>
           </div>
         </section>
+
+        {/* Sede Visual Section - REPLACES CONVENTIONAL MAP */}
+        <section id="sede-location" className="mb-32 relative group overflow-hidden rounded-[4rem] shadow-5xl">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-900/90 via-blue-900/40 to-transparent z-10"></div>
+            <img 
+                src="https://images.unsplash.com/photo-1438029071396-1e831a7fa6d8?auto=format&fit=crop&q=80&w=1920" 
+                alt="Nadador en nuestra piscina" 
+                className="w-full h-[500px] object-cover transition-transform duration-[3000ms] group-hover:scale-110" 
+            />
+            <div className="absolute inset-0 z-20 flex items-center p-12 lg:p-24">
+                <div className="max-w-xl text-white">
+                    <div className="inline-flex items-center gap-2 bg-blue-500/30 backdrop-blur-md px-4 py-2 rounded-full border border-blue-400/30 mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                        <span className="text-[10px] font-black uppercase tracking-widest">Nuestra Pileta</span>
+                    </div>
+                    <h2 className="text-5xl font-black mb-6 tracking-tighter leading-none">Vení a Entrenar <br/> a CABA</h2>
+                    <p className="text-2xl font-black text-blue-300 mb-8">Paraguay 2060, CABA</p>
+                    <div className="flex flex-wrap gap-4">
+                        <a 
+                            href="https://www.google.com/maps/search/?api=1&query=Paraguay+2060,+CABA" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="bg-white text-slate-900 px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-50 transition-all flex items-center gap-3"
+                        >
+                            Ver en Google Maps
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
       </main>
 
-      <footer className="relative z-10 mt-32 border-t border-slate-200 bg-white/95 backdrop-blur-md py-20">
+      {/* Footer */}
+      <footer className="relative z-10 border-t border-slate-200 bg-white/95 backdrop-blur-xl py-24">
         <div className="container mx-auto px-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-12">
-            <div className="flex items-center gap-5">
-               <div className="bg-blue-600 p-4 rounded-[1.5rem] text-white shadow-2xl shadow-blue-500/30">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-16">
+            <div className="flex items-center gap-6">
+               <div className="bg-blue-600 p-5 rounded-[2rem] text-white shadow-2xl shadow-blue-500/40">
                   <ICONS.Waves />
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-black text-3xl text-slate-900 tracking-tighter">Obras Paraguay</span>
-                  <span className="text-xs font-black text-slate-400 uppercase tracking-[0.3em]">Club de Natación</span>
+                  <span className="font-black text-4xl text-slate-900 tracking-tighter leading-none">Obras Paraguay</span>
+                  <span className="text-xs font-black text-slate-400 uppercase tracking-[0.4em] mt-1">Sede CABA</span>
                 </div>
             </div>
-            <div className="flex flex-wrap gap-x-12 gap-y-6 justify-center text-xs font-black text-slate-500 uppercase tracking-widest">
-              <button onClick={() => setShowReglamento(true)} className="hover:text-blue-600 transition-colors">Reglamento</button>
-              <a 
-                href="https://www.google.com/maps/search/?api=1&query=Paraguay+2060,+CABA" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="hover:text-blue-600 transition-colors"
+            <div className="flex flex-wrap gap-x-16 gap-y-8 justify-center text-[11px] font-black text-slate-500 uppercase tracking-[0.25em]">
+              <button onClick={() => setShowReglamento(true)} className="hover:text-blue-600 transition-all hover:scale-105">Reglamento</button>
+              <button 
+                onClick={scrollToLocation}
+                className="hover:text-blue-600 transition-all hover:scale-105"
               >
                 Ubicación
-              </a>
-              <a href="#" className="hover:text-blue-600 transition-colors">Soporte</a>
+              </button>
+              <a href="#" className="hover:text-blue-600 transition-all hover:scale-105">Soporte</a>
             </div>
-            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest text-center">
-              © 2024 Escuela de Natación Obras Paraguay. <br/>
-              Paraguay 2060, CABA.
-            </p>
+            <div className="text-right">
+                <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] leading-loose">
+                  © 2024 Escuela de Natación Obras Paraguay. <br/>
+                  Paraguay 2060, CABA.
+                </p>
+            </div>
           </div>
         </div>
       </footer>
@@ -302,13 +355,13 @@ const App: React.FC = () => {
       )}
 
       {showConfirmation && (
-        <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[100] bg-emerald-600 text-white px-10 py-6 rounded-[2.5rem] shadow-3xl flex items-center gap-6 animate-in fade-in slide-in-from-top-8 duration-500 max-w-lg border-2 border-white/20">
-          <div className="bg-white/20 p-3 rounded-2xl shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <div className="fixed top-12 left-1/2 -translate-x-1/2 z-[100] bg-emerald-600 text-white px-12 py-8 rounded-[3rem] shadow-5xl flex items-center gap-8 animate-in fade-in slide-in-from-top-12 duration-700 max-w-xl border-2 border-white/20">
+          <div className="bg-white/20 p-4 rounded-2xl shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
           <div className="font-bold text-left">
-            <p className="text-xl font-black">Pre-Reserva Lista</p>
-            <p className="text-sm font-medium opacity-90 leading-tight mt-1 text-emerald-50">Por favor, acércate a recepción en Paraguay 2060 para confirmar tu lugar.</p>
+            <p className="text-2xl font-black tracking-tight">Pre-Reserva Exitosa</p>
+            <p className="text-base font-medium opacity-90 leading-tight mt-1 text-emerald-50">Por favor, acércate a recepción en Paraguay 2060 para confirmar tu lugar con el pago.</p>
           </div>
         </div>
       )}
