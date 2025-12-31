@@ -39,15 +39,14 @@ const ClassCard: React.FC<ClassCardProps> = ({ swimmingClass, onBook }) => {
             <span className="text-sm font-bold tracking-tight">{swimmingClass.days.join(', ')}</span>
           </div>
           <div className="flex items-center gap-4 text-slate-600 group/item">
-            {/* Ícono de Pileta/Agua para horario */}
             <div className="text-blue-500 transition-transform group-hover/item:scale-110">
               <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12c.6.5 1.2 1 2.5 1 3 0 3-2 5.5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 3 0 3-2 5.5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></svg>
             </div>
             <span className="text-sm font-bold tracking-tight">{swimmingClass.time}</span>
           </div>
           <div className="flex items-center gap-4 text-slate-600 group/item">
-            <div className="text-blue-500 transition-transform group-hover/item:scale-110">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <div className="text-xl transition-transform group-hover/item:scale-110 select-none">
+              👨‍🏫👩‍🏫
             </div>
             <span className="text-sm font-bold tracking-tight">Prof: {swimmingClass.instructor}</span>
           </div>
