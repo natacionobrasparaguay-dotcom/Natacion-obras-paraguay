@@ -4,7 +4,6 @@ import { Category, SwimmingClass } from './types';
 import { CLASSES_DATA, ICONS } from './constants';
 import ClassCard from './components/ClassCard';
 import ReservationForm from './components/ReservationForm';
-import ChatBot from './components/ChatBot';
 import AdminPanel from './components/AdminPanel';
 import ReglamentoModal from './components/ReglamentoModal';
 
@@ -84,7 +83,7 @@ const App: React.FC = () => {
     
     setSelectedClassId(null);
     setShowConfirmation(true);
-    setTimeout(() => setShowConfirmation(false), 6000);
+    setTimeout(() => setShowConfirmation(false), 8000);
   };
 
   const MAP_URL = "https://www.google.com/maps/search/?api=1&query=Paraguay+2060,+CABA";
@@ -132,8 +131,8 @@ const App: React.FC = () => {
       <header className="relative h-[720px] flex items-center overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-blue-900/60 via-blue-900/40 to-slate-900/80 z-10"></div>
         <img 
-          src="https://images.unsplash.com/photo-1600965962102-9d261a2179d1?q=80&w=1920" 
-          alt="Nadador en acción estilo mariposa" 
+          src="https://images.unsplash.com/photo-1585129014169-2a9009859f5b?q=80&w=1920" 
+          alt="Niño nadando alegremente con antiparras en la pileta" 
           className="absolute inset-0 w-full h-full object-cover object-center"
           style={{ animation: 'slow-zoom 30s infinite alternate linear' }}
         />
@@ -154,8 +153,8 @@ const App: React.FC = () => {
               <span className="font-bold tracking-[0.25em] text-xs uppercase drop-shadow-md opacity-90">Sede Paraguay 2060, CABA</span>
             </div>
             <h1 className="text-6xl md:text-8xl font-black mb-8 leading-[0.9] tracking-tighter drop-shadow-2xl animate-in fade-in slide-in-from-left-6 duration-1000">
-              Nadadores de <br/>
-              <span className="text-blue-300">Alto Nivel</span>
+              Potenciamos tu <br/>
+              <span className="text-blue-300">bienestar</span>
             </h1>
             <p className="text-xl md:text-2xl text-blue-50 font-medium leading-relaxed max-w-xl mb-10 opacity-95 drop-shadow-md animate-in fade-in slide-in-from-left-8 duration-1000 delay-200">
               Entrená en nuestra pileta semi-olímpica climatizada. Técnica profesional para todas las edades en el corazón de Buenos Aires.
@@ -330,8 +329,11 @@ const App: React.FC = () => {
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
           <div className="font-bold text-left">
-            <p className="text-2xl font-black tracking-tight">Pre-Reserva Exitosa</p>
-            <p className="text-base font-medium opacity-90 leading-tight mt-1 text-emerald-50">Por favor, acércate a recepción en Paraguay 2060 para confirmar tu lugar con el pago.</p>
+            <p className="text-2xl font-black tracking-tight">¡Pre-Reserva Exitosa!</p>
+            <p className="text-base font-medium opacity-90 leading-tight mt-1 text-emerald-50">
+              El cupo queda confirmado una vez procesado el pago en recepción. <br/>
+              <b>Te enviaremos un email de confirmación</b> a la brevedad.
+            </p>
           </div>
         </div>
       )}
@@ -343,8 +345,6 @@ const App: React.FC = () => {
       {showReglamento && (
         <ReglamentoModal onClose={() => setShowReglamento(false)} />
       )}
-
-      <ChatBot />
     </div>
   );
 };
