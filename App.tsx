@@ -95,14 +95,14 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen relative font-sans selection:bg-blue-100 selection:text-blue-900">
-      {/* Background Image Container */}
+      {/* Background Image Container - Actualizado con andariveles */}
       <div className="fixed inset-0 z-0">
         <img 
-          src="https://images.unsplash.com/photo-1590426466826-6997486e969d?q=80&w=1920" 
-          alt="Background" 
-          className="w-full h-full object-cover opacity-15 grayscale"
+          src="https://images.unsplash.com/photo-1519315530759-390442373323?q=80&w=1920" 
+          alt="Pileta con andariveles" 
+          className="w-full h-full object-cover opacity-20 grayscale-[0.3]"
         />
-        <div className="absolute inset-0 bg-slate-50/90"></div>
+        <div className="absolute inset-0 bg-slate-50/85"></div>
       </div>
 
       {/* Top Navbar */}
