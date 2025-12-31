@@ -44,12 +44,16 @@ const ClassCard: React.FC<ClassCardProps> = ({ swimmingClass, onBook }) => {
             </div>
             <span className="text-sm font-bold tracking-tight">{swimmingClass.time}</span>
           </div>
-          <div className="flex items-center gap-4 text-slate-600 group/item">
-            <div className="text-xl transition-transform group-hover/item:scale-110 select-none">
-              👨‍🏫👩‍🏫
+          
+          {/* Solo mostramos la información del profesor si NO es la categoría Niños */}
+          {swimmingClass.category !== Category.KIDS && (
+            <div className="flex items-center gap-4 text-slate-600 group/item">
+              <div className="text-xl transition-transform group-hover/item:scale-110 select-none">
+                👨‍🏫👩‍🏫
+              </div>
+              <span className="text-sm font-bold tracking-tight">Prof: {swimmingClass.instructor}</span>
             </div>
-            <span className="text-sm font-bold tracking-tight">Prof: {swimmingClass.instructor}</span>
-          </div>
+          )}
         </div>
 
         <div className="flex items-center justify-between pt-8 border-t border-slate-100">

@@ -44,7 +44,7 @@ export const CLASSES_DATA: SwimmingClass[] = [
     ageRange: "4 a 6 años",
     time: '17:00 - 18:00',
     days: ['Lunes', 'Miércoles', 'Jueves'],
-    instructor: 'Staff Obras',
+    instructor: '',
     capacity: 10,
     remainingSlots: 10,
     price: 4500
@@ -56,7 +56,7 @@ export const CLASSES_DATA: SwimmingClass[] = [
     ageRange: "4 a 6 años",
     time: '18:00 - 19:00',
     days: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'],
-    instructor: 'Staff Obras',
+    instructor: '',
     capacity: 10,
     remainingSlots: 10,
     price: 4500
@@ -68,7 +68,7 @@ export const CLASSES_DATA: SwimmingClass[] = [
     ageRange: "4 a 6 años",
     time: '19:00 - 20:00',
     days: ['Martes'],
-    instructor: 'Staff Obras',
+    instructor: '',
     capacity: 10,
     remainingSlots: 10,
     price: 4500
@@ -82,7 +82,7 @@ export const CLASSES_DATA: SwimmingClass[] = [
     ageRange: "7 a 9 años",
     time: '17:00 - 18:00',
     days: ['Lunes', 'Miércoles', 'Jueves'],
-    instructor: 'Staff Obras',
+    instructor: '',
     capacity: 10,
     remainingSlots: 10,
     price: 4800
@@ -94,7 +94,7 @@ export const CLASSES_DATA: SwimmingClass[] = [
     ageRange: "7 a 9 años",
     time: '18:00 - 19:00',
     days: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'],
-    instructor: 'Staff Obras',
+    instructor: '',
     capacity: 10,
     remainingSlots: 10,
     price: 4800
@@ -106,7 +106,7 @@ export const CLASSES_DATA: SwimmingClass[] = [
     ageRange: "7 a 9 años",
     time: '19:00 - 20:00',
     days: ['Martes'],
-    instructor: 'Staff Obras',
+    instructor: '',
     capacity: 10,
     remainingSlots: 10,
     price: 4800
@@ -120,7 +120,7 @@ export const CLASSES_DATA: SwimmingClass[] = [
     ageRange: "10 a 12 años",
     time: '17:00 - 18:00',
     days: ['Lunes', 'Miércoles'],
-    instructor: 'Staff Obras',
+    instructor: '',
     capacity: 10,
     remainingSlots: 10,
     price: 5000
@@ -132,7 +132,7 @@ export const CLASSES_DATA: SwimmingClass[] = [
     ageRange: "10 a 12 años",
     time: '18:00 - 19:00',
     days: ['Lunes', 'Viernes'],
-    instructor: 'Staff Obras',
+    instructor: '',
     capacity: 10,
     remainingSlots: 10,
     price: 5000
